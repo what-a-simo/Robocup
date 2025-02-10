@@ -51,6 +51,8 @@ def numToBlock(num):
         return '█'
 
 start = robot.getTime()
+
+# main
 def main():
     while robot.step(timeStep) != -1:
         print(numToBlock(distanceSensorLeft.getValue()), numToBlock(distanceSensorFront.getValue()), numToBlock(distanceSensorRight.getValue()))
