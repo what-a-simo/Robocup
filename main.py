@@ -15,13 +15,6 @@ wheel_right = robot.getDevice("wheel1 motor")
 wheel_left.setPosition(float("inf"))
 wheel_right.setPosition(float("inf"))
 
-# encoder?
-leftEncoder = wheel_left.getPositionSensor()
-rightEncoder = wheel_right.getPositionSensor()
-
-leftEncoder.enable(timeStep)
-rightEncoder.enable(timeStep)
-
 # sensori di distanza frontale, destro e sinistro
 distanceSensorRight = robot.getDevice("distance sensor1")
 distanceSensorLeft = robot.getDevice("distance sensor2")
@@ -30,6 +23,10 @@ distanceSensorFront = robot.getDevice("distance sensor3")
 distanceSensorRight.enable(timeStep)
 distanceSensorLeft.enable(timeStep)
 distanceSensorFront.enable(timeStep)
+
+# inertial unit
+inertialUnit = robot.getDevice("inertial_unit")
+inertialUnit.enable(timeStep)
 
 # output dei sensori di distanza
 def numToBlock(num):
@@ -78,8 +75,7 @@ def main():
         wheel_left.setVelocity(speed1)
         wheel_right.setVelocity(speed2)
 
-        print("Left motor has spun " + str(leftEncoder.getValue()) + " radians")
-        print("Right motor has spun " + str(rightEncoder.getValue()) + " radians")
+        print(inertialUnit.getRollPitchYaw())
 
 if __name__ == "__main__":
     main()
