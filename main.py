@@ -1,4 +1,3 @@
-
 from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS
 import math
 
