@@ -1,3 +1,4 @@
+
 from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS
 import math
 
@@ -168,6 +169,11 @@ def gpsValues():
     position = gps.getValues()
     x = position[0] * 100
     y = position[2] * 100
+    return x, y
+
+
+def printGpsValues():
+    x, y = gpsValues()
     print("X: " + str(x) + " - Y: " + str(y))
 
 
@@ -175,7 +181,7 @@ def navigate():
     while robot.step(timeStep) != -1:
         print(numToBlock(distanceSensorLeft.getValue()), numToBlock(distanceSensorFront.getValue()), numToBlock(distanceSensorRight.getValue()))
         print(round(inertialUnit.getRollPitchYaw()[2], 1))
-        gpsValues()
+        printGpsValues()
         getColour()
         if getColour() == "hole":
             stopMotors()
