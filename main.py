@@ -1,4 +1,4 @@
-from controller import Robot, DistanceSensor, PositionSensor, Camera
+from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS
 import math
 
 
@@ -42,6 +42,11 @@ inertialUnit.enable(timeStep)
 # sensore di colore
 colorSensor = robot.getDevice("colour_sensor")
 colorSensor.enable(timeStep)
+
+
+# GPS
+gps = robot.getDevice("gps")
+gps.enable(timeStep)
 
 
 # output dei sensori di distanza
@@ -92,7 +97,23 @@ def spinOnLeft():
     wheel_right.setVelocity(rotation_speed)
 
 
+def nearWall():
+    while robot.step(timeStep) != -1:
+        forward()
+        if getColour() == "wallB" or getColour() == "wallS":
+            nearWallBack()
+            break
+
+
+def nearWallBack():
+    while robot.step(timeStep) != -1:
+        goBack()
+        if getColour() == "brown" or getColour() == "white":
+            break
+
+
 def turnOnLeft():
+    nearWall()
     initial_orientation = inertialUnit.getRollPitchYaw()[2]
     target_orientation = initial_orientation - math.radians(-90)
     spinOnLeft()
@@ -104,6 +125,7 @@ def turnOnLeft():
 
 
 def turnOnRight():
+    nearWall()
     initial_orientation = inertialUnit.getRollPitchYaw()[2]
     target_orientation = initial_orientation - math.radians(90)
     spinOnRight()
@@ -138,10 +160,22 @@ def hole():
     wallAhead()
 
 
+def stayedForTooLong():
+    forward()
+
+
+def gpsValues():
+    position = gps.getValues()
+    x = position[0] * 100
+    y = position[2] * 100
+    print("X: " + str(x) + " - Y: " + str(y))
+
+
 def navigate():
     while robot.step(timeStep) != -1:
         print(numToBlock(distanceSensorLeft.getValue()), numToBlock(distanceSensorFront.getValue()), numToBlock(distanceSensorRight.getValue()))
         print(round(inertialUnit.getRollPitchYaw()[2], 1))
+        gpsValues()
         getColour()
         if getColour() == "hole":
             stopMotors()
@@ -166,36 +200,45 @@ def getColour():
     g = colorSensor.imageGetGreen(image, 1, 0, 0)
     b = colorSensor.imageGetBlue(image, 1, 0, 0)
     print("r: " + str(r) + " g: " + str(g) + " b: " + str(b))
-    if r >= 203 and r <= 233 and g >= 170 and g <= 200 and b >= 93 and b <= 123:
+    if 203 <= r <= 233 and 170 <= g <= 200 and 93 <= b <= 123:
         print("Brown")
         return "brown"
-    if r >= 0 and r <= 30 and g >= 0 and g <= 30 and b >= 0 and b <= 30:
+    if 0 <= r <= 30 and 0 <= g <= 30 and 0 <= b <= 30:
         print("Black")
         return "black"
-    if r >= 225 and r <= 255 and g >= 0 and g <= 30 and b >= 0 and b <= 30:
+    if 225 <= r <= 255 and 0 <= g <= 30 and 0 <= b <= 30:
         print("Red")
         return "black"
-    if r >= 0 and r <= 30 and g >= 225 and g <= 255 and b >= 0 and b <= 30:
+    if 0 <= r <= 30 and 225 <= g <= 255 and 0 <= b <= 30:
         print("Green")
         return "green"
-    if r >= 0 and r <= 30 and g >= 0 and g <= 30 and b >= 225 and b <= 255:
+    if 0 <= r <= 30 and 0 <= g <= 30 and 225 <= b <= 255:
         print("Blue")
         return "blue"
-    if r >= 113 and r <= 173 and g >= 0 and g <= 30 and b >= 225 and b <= 255:
+    if 113 <= r <= 173 and 0 <= g <= 30 and 225 <= b <= 255:
         print("Purple")
         return "purple"
-    if r >= 120 and r <= 180 and g >= 120 and g <= 180 and b >= 120 and b <= 180:
+    if 120 <= r <= 180 and 120 <= g <= 180 and 120 <= b <= 180:
         print("Gray")
         return "gray"
-    if r >= 29 and r <= 59 and g >= 33 and g <= 63 and b >= 46 and b <= 76:
+    if 29 <= r <= 59 and 33 <= g <= 63 and 46 <= b <= 76:
         print("Checkpoint")
         return "checkpoint"
-    if r >= 93 and r <= 123 and g >= 93 and g <= 123 and b >= 93 and b <= 123:
+    if 93 <= r <= 123 and 93 <= g <= 123 and 93 <= b <= 123:
         print("Hole border")
         return "hole"
-    if r >= 225 and r <= 255 and g >= 225 and g <= 255 and b >= 225 and b <= 255:
+    if 225 <= r <= 255 and 225 <= g <= 255 and 225 <= b <= 255:
         print("White")
         return "white"
+    if 86 <= r <= 116 and 177 <= g <= 127 and 191 <= b <= 221:
+        print("Wall")
+        return "wall"
+    if 42 <= r <= 46 and 42 <= g <= 46 and 42 <= b <= 46:
+        print("Wall Black")
+        return  "wallB"
+    if 126 <= r <= 234 and 222 <= g <= 255 and 231 <= b <= 255:
+        print("Strange wall")
+        return  "wallS"
     #height = colorSensor.getHeight()
     #width = colorSensor.getWidth()
 
