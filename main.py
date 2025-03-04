@@ -44,6 +44,12 @@ colorSensor = robot.getDevice("colour_sensor")
 colorSensor.enable(timeStep)
 
 
+# emitter e receiver
+receiver = robot.getDevice("receiver")
+emitter = robot.getDevice("emitter")
+receiver.enable(timeStep)
+
+
 # GPS
 gps = robot.getDevice("gps")
 gps.enable(timeStep)
