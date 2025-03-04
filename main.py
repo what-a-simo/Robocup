@@ -1,5 +1,8 @@
+
 from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS
 import math
+#import cv2
+import numpy as np
 
 
 # timeStep e velocità massima
@@ -32,6 +35,13 @@ distanceSensorFront = robot.getDevice("distance sensor3")
 distanceSensorRight.enable(timeStep)
 distanceSensorLeft.enable(timeStep)
 distanceSensorFront.enable(timeStep)
+
+
+# Camera
+camera1 = robot.getDevice("camera1")
+camera2 = robot.getDevice("camera2")
+camera1.enable(timeStep)
+camera2.enable(timeStep)
 
 
 # inertial unit
@@ -180,6 +190,22 @@ def gpsValues():
 def printGpsValues():
     x, y = gpsValues()
     print("X: " + str(x) + " - Y: " + str(y))
+
+
+#def getimage():
+#    image = camera.getImage()
+#    image = np.frombuffer(image, np.uint8).reshape((camera.getHeight(), camera.getWidth(), 4))
+#    frame = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
+
+#    cv2.imshow("frame", frame)
+
+#    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+#    cv2.imshow("grayScale", frame)
+
+#    cv2.threshold(frame, 80, 255, cv2.THRESH_BINARY)
+#    cv2.imshow("thresh", frame)
+
+#    cv2.waitKey(1)
 
 
 def navigate():
