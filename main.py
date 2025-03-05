@@ -191,20 +191,16 @@ def printGpsValues():
     print("X: " + str(x) + " - Y: " + str(y))
 
 
-#def getimage():
-#    image = camera.getImage()
-#    image = np.frombuffer(image, np.uint8).reshape((camera.getHeight(), camera.getWidth(), 4))
-#    frame = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
+def getimage():
+    image = camera1.getImage()
 
-#    cv2.imshow("frame", frame)
+    width = camera1.getWidth()
+    height = camera1.getHeight()
+    image_array = np.frombuffer(image, dtype=np.uint8).reshape((height, width, 4))  # RGBA format
 
-#    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-#    cv2.imshow("grayScale", frame)
-
-#    cv2.threshold(frame, 80, 255, cv2.THRESH_BINARY)
-#    cv2.imshow("thresh", frame)
-
-#    cv2.waitKey(1)
+    image_rgb = cv2.cvtColor(image_array, cv2.COLOR_RGBA2RGB)
+    image_resized = cv2.resize(image_rgb, (64,40))
+    cv2.imwrite("captured_image.jpg", image_resized)
 
 
 def navigate():
