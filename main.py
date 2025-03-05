@@ -1,6 +1,6 @@
 from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS
 import math
-#import cv2
+import cv2
 import numpy as np
 
 
