@@ -123,7 +123,7 @@ def nearWall():
 def nearWallBack():
     while robot.step(timeStep) != -1:
         goBack()
-        if getColour() == "brown" or getColour() == "white":
+        if getColour() == "brown" or getColour() == "white" or getColour() == "green" or getColour() == "checkpoint" or getColour() == "purple" or getColour() == "red" or getColour() == "blue":
             break
 
 
@@ -218,10 +218,10 @@ def navigate():
             hole()
         if distanceSensorFront.getValue() <= 0.1:
             stopMotors()
-            if distanceSensorRight.getValue() <= 0.2:
+            if distanceSensorRight.getValue() <= 0.1:
                 print("wall on right")
                 turnOnLeft()
-            elif distanceSensorLeft.getValue() <= 0.2:
+            elif distanceSensorLeft.getValue() <= 0.1:
                 print("wall on left")
                 turnOnRight()
             else:
@@ -242,16 +242,16 @@ def getColour():
     if 0 <= r <= 30 and 0 <= g <= 30 and 0 <= b <= 30:
         print("Black")
         return "black"
-    if 225 <= r <= 255 and 0 <= g <= 30 and 0 <= b <= 30:
+    if 225 <= r <= 255 and 50 <= g <= 80 and 50 <= b <= 80:
         print("Red")
-        return "black"
-    if 0 <= r <= 30 and 225 <= g <= 255 and 0 <= b <= 30:
+        return "red"
+    if 20 <= r <= 50 and 225 <= g <= 255 and 20 <= b <= 50:
         print("Green")
         return "green"
-    if 0 <= r <= 30 and 0 <= g <= 30 and 225 <= b <= 255:
+    if 50 <= r <= 80 and 50 <= g <= 80 and 225 <= b <= 255:
         print("Blue")
         return "blue"
-    if 113 <= r <= 173 and 0 <= g <= 30 and 225 <= b <= 255:
+    if 113 <= r <= 173 and 56 <= g <= 79 and 225 <= b <= 255:
         print("Purple")
         return "purple"
     if 120 <= r <= 180 and 120 <= g <= 180 and 120 <= b <= 180:
