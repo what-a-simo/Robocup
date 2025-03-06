@@ -191,16 +191,24 @@ def printGpsValues():
     print("X: " + str(x) + " - Y: " + str(y))
 
 
-def getimage():
-    image = camera1.getImage()
+def getImageCamera():
+    image1 = camera1.getImage()
+    image2 = camera2.getImage()
 
     width = camera1.getWidth()
     height = camera1.getHeight()
-    image_array = np.frombuffer(image, dtype=np.uint8).reshape((height, width, 4))  # RGBA format
+    print(str(width) + " " + str(height))
 
-    image_rgb = cv2.cvtColor(image_array, cv2.COLOR_RGBA2RGB)
-    image_resized = cv2.resize(image_rgb, (64,40))
-    cv2.imwrite("captured_image.jpg", image_resized)
+    image_array1 = np.frombuffer(image1, dtype=np.uint8).reshape((height, width, 4))
+
+    image_array2 = np.frombuffer(image2, dtype=np.uint8).reshape((height, width, 4))
+
+    image_rgb1 = cv2.cvtColor(image_array1, cv2.COLOR_RGBA2RGB)
+    image_rgb2 = cv2.cvtColor(image_array2, cv2.COLOR_RGBA2RGB)
+    image_resized1 = cv2.resize(image_rgb1, (64,40))
+    image_resized2 = cv2.resize(image_rgb2, (64, 40))
+    cv2.imwrite("captured_image_camera1.jpg", image_resized1)
+    cv2.imwrite("captured_image_camera2.jpg", image_resized2)
 
 
 def navigate():
@@ -209,6 +217,7 @@ def navigate():
         print(round(inertialUnit.getRollPitchYaw()[2], 1))
         printGpsValues()
         getColour()
+        getImageCamera()
         if getColour() == "hole":
             stopMotors()
             hole()
