@@ -2,6 +2,8 @@ from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS
 import math
 import cv2
 import numpy as np
+import keras
+import tensorflow as tf
 
 
 # timeStep e velocità massima
@@ -127,14 +129,29 @@ def nearWallBack():
             break
 
 
+def kebab():
+    stopMotors()
+    target_orientation = 0.0
+    spinOnLeft()
+    while robot.step(timeStep) != -1:
+        current_orientation = inertialUnit.getRollPitchYaw()[2]
+        if abs(current_orientation - target_orientation) < 0.04:
+            break
+
+
 def turnOnLeft():
     nearWall()
     initial_orientation = inertialUnit.getRollPitchYaw()[2]
     target_orientation = initial_orientation - math.radians(-90)
     spinOnLeft()
+    counter = 0
     while robot.step(timeStep) != -1:
+        counter = counter + 1
         current_orientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(current_orientation - target_orientation) < 0.05:
+        if abs(current_orientation - target_orientation) < 0.03:
+            break
+        elif counter == 70:
+            kebab()
             break
     stopMotors()
 
@@ -144,9 +161,14 @@ def turnOnRight():
     initial_orientation = inertialUnit.getRollPitchYaw()[2]
     target_orientation = initial_orientation - math.radians(90)
     spinOnRight()
+    counter = 0
     while robot.step(timeStep) != -1:
+        counter = counter + 1
         current_orientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(current_orientation - target_orientation) < 0.05:
+        if abs(current_orientation - target_orientation) < 0.03:
+            break
+        elif counter == 70:
+            kebab()
             break
     stopMotors()
 
@@ -154,11 +176,11 @@ def turnOnRight():
 def wallAhead():
     while robot.step(timeStep) != -1:
         stopMotors()
-        if distanceSensorRight.getValue() <= 0.8:
+        if distanceSensorRight.getValue() <= 0.5:
             print("wall on right")
             turnOnLeft()
             break
-        elif distanceSensorLeft.getValue() <= 0.8:
+        elif distanceSensorLeft.getValue() <= 0.5:
             print("wall on left")
             turnOnRight()
             break
