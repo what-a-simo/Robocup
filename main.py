@@ -1,9 +1,10 @@
-from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS
+from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS, Emitter
 import math
 import cv2
 import numpy as np
-import keras
-import tensorflow as tf
+#import keras
+#import tensorflow as tf
+import struct
 
 
 # timeStep e velocità massima
@@ -148,7 +149,7 @@ def turnOnLeft():
     while robot.step(timeStep) != -1:
         counter = counter + 1
         current_orientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(current_orientation - target_orientation) < 0.03:
+        if abs(current_orientation - target_orientation) < 0.02:
             break
         elif counter == 70:
             kebab()
@@ -165,7 +166,7 @@ def turnOnRight():
     while robot.step(timeStep) != -1:
         counter = counter + 1
         current_orientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(current_orientation - target_orientation) < 0.03:
+        if abs(current_orientation - target_orientation) < 0.02:
             break
         elif counter == 70:
             kebab()
@@ -233,6 +234,28 @@ def getImageCamera():
     cv2.imwrite("captured_image_camera2.jpg", image_resized2)
 
 
+def score():
+    victimType = bytes('H', "utf-8")
+    position = gpsValues()
+    x = int(position[0])
+    y = int(position[1])
+    message = struct.pack("i i c", x, y, victimType)
+    emitter.send(message)
+
+
+def getScore():
+    message = struct.pack('c', 'G'.encode())
+    emitter.send(message)
+    if receiver.getQueueLength() > 0:
+        receivedData = receiver.getBytes()
+        tup = struct.unpack('c f i', receivedData)
+        if tup[0].decode("utf-8") == 'G':
+            #if tup[2] == 5:
+            #    emitter.send(bytes('E', "utf-8"))
+            print(f'Game Score: {tup[1]}  Remaining time: {tup[2]}')
+            receiver.nextPacket()
+
+
 def navigate():
     while robot.step(timeStep) != -1:
         print(numToBlock(distanceSensorLeft.getValue()), numToBlock(distanceSensorFront.getValue()), numToBlock(distanceSensorRight.getValue()))
@@ -240,6 +263,8 @@ def navigate():
         printGpsValues()
         getColour()
         getImageCamera()
+        score()
+        getScore()
         if getColour() == "hole":
             stopMotors()
             hole()
