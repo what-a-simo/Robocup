@@ -70,12 +70,12 @@ batch_size = 16
 
 model= keras.models.load_model('testModel.keras')
 
-image1 = tf.io.read_file("TestTraining/harmed_Victims/image0_2.png")
+image1 = tf.io.read_file("TestTraining/unharmed_Victims/image2_7 (1)_black_background.png")
 image1 = tf.image.decode_jpeg(image1, channels=3)
 image1 = tf.image.resize(image1, [64, 40])
 image1 = image1 / 255.0
 image1 = tf.expand_dims(image1, axis=0)
 
-#output = model.predict(image1)
-#decoded_predictions = keras.applications.mobilenet_v2.decode_predictions(output)
-#print(decoded_predictions)
+output = model.predict(image1)
+predicted_class = tf.argmax(output, axis=-1).numpy()[0]
+print(f"Predicted class index: {predicted_class}")
