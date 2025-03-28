@@ -2,8 +2,8 @@ from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS, Emitt
 import math
 import cv2
 import numpy as np
-#import keras
-#import tensorflow as tf
+import keras
+import tensorflow as tf
 import struct
 
 
@@ -218,6 +218,44 @@ def printGpsValues():
     print("X: " + str(x) + " - Y: " + str(y))
 
 
+def getCameraRecognitionResult(image):
+    image = tf.image.decode_jpeg(image, channels=3)
+    image = tf.image.resize(image, [64, 40])
+    image = image / 255.0
+    image = tf.expand_dims(image, axis=0)
+
+    output = model.predict(image)
+    predictedClass = tf.argmax(output, axis=-1).numpy()[0]
+    match predictedClass:
+        case 0:
+            print("Is corrosive")
+            return 'C'
+        case 1:
+            print("Is flammable")
+            return 'F'
+        case 2:
+            print("Is an H")
+            return 'H'
+        case 3:
+            print("Is a wall")
+            return '1'
+        case 4:
+            print("Is organic")
+            return 'O'
+        case 5:
+            print("Is poison")
+            return 'P'
+        case 6:
+            print("Is an S")
+            return 'S'
+        case 7:
+            print("Is an U")
+            return 'U'
+        case _:
+            print("Undefined")
+            return '-'
+
+
 def getImageCamera():
     image1 = camera1.getImage()
     image2 = camera2.getImage()
@@ -237,35 +275,16 @@ def getImageCamera():
     cv2.imwrite("captured_image_camera1.jpg", image_resized1)
     cv2.imwrite("captured_image_camera2.jpg", image_resized2)
 
-    image_resized1 = tf.image.decode_jpeg(image_resized1, channels=3)
-    image_resized1 = tf.image.resize(image_resized1, [64, 40])
-    image_resized1 = image_resized1 / 255.0
-    image_resized1 = tf.expand_dims(image_resized1, axis=0)
+    ch = getCameraRecognitionResult(image_resized1)
+    if ch != '-':
+        score(ch)
+    ch = getCameraRecognitionResult(image_resized2)
+    if ch != '-':
+        score(ch)
 
-    output = model.predict(image_resized1)
-    predictedClass = tf.argmax(output, axis=-1).numpy()[0]
-    match predictedClass:
-        case 0:
-            print("Is corrosive")
-        case 1:
-            print("Is flammable")
-        case 2:
-            print("Is an H")
-        case 3:
-            print("Is a wall")
-        case 4:
-            print("Is organic")
-        case 5:
-            print("Is poison")
-        case 6:
-            print("Is an S")
-        case 7:
-            print("Is an U")
-        case _:
-            print("Undefined")
 
-def score():
-    victimType = bytes('H', "utf-8")
+def score(ch):
+    victimType = bytes(ch, "utf-8")
     position = gpsValues()
     x = int(position[0])
     y = int(position[1])
@@ -293,7 +312,6 @@ def navigate():
         printGpsValues()
         getColour()
         getImageCamera()
-        score()
         getScore()
         if getColour() == "hole":
             stopMotors()
