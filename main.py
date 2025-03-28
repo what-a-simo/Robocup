@@ -233,6 +233,27 @@ def getImageCamera():
     cv2.imwrite("captured_image_camera1.jpg", image_resized1)
     cv2.imwrite("captured_image_camera2.jpg", image_resized2)
 
+    output = model.predict(image_resized1)
+    predictedClass = tf.argmax(output, axis=-1).numpy()[0]
+    match predictedClass:
+        case 0:
+            print("Is corrosive")
+        case 1:
+            print("Is flammable")
+        case 2:
+            print("Is an H")
+        case 3:
+            print("Is a wall")
+        case 4:
+            print("Is organic")
+        case 5:
+            print("Is poison")
+        case 6:
+            print("Is an S")
+        case 7:
+            print("Is an U")
+        case _:
+            print("Undefined")
 
 def score():
     victimType = bytes('H', "utf-8")
