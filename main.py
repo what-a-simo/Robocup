@@ -2,7 +2,6 @@ from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS, Emitt
 import math
 import cv2
 import numpy as np
-import keras
 import tensorflow as tf
 import struct
 
@@ -68,7 +67,7 @@ gps.enable(timeStep)
 
 
 #load model
-model = keras.models.load_model("AI/testModel.keras")
+model = tf.keras.models.load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/testModel.keras")
 
 
 # output dei sensori di distanza
@@ -219,12 +218,15 @@ def printGpsValues():
 
 
 def getCameraRecognitionResult(image):
-    image = tf.image.decode_jpeg(image, channels=3)
-    image = tf.image.resize(image, [64, 40])
-    image = image / 255.0
-    image = tf.expand_dims(image, axis=0)
+    image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
-    output = model.predict(image)
+    image_gray = np.expand_dims(image_gray, axis=-1)
+
+    image_gray = image_gray / 255.0
+
+    image_gray = np.expand_dims(image_gray, axis=0)
+
+    output = model.predict(image_gray)
     predictedClass = tf.argmax(output, axis=-1).numpy()[0]
     match predictedClass:
         case 0:
@@ -274,6 +276,9 @@ def getImageCamera():
     image_resized2 = cv2.resize(image_rgb2, (64, 40))
     cv2.imwrite("captured_image_camera1.jpg", image_resized1)
     cv2.imwrite("captured_image_camera2.jpg", image_resized2)
+
+    image_resized1 = np.array(image_resized1, dtype=np.uint8)
+    image_resized2 = np.array(image_resized2, dtype=np.uint8)
 
     ch = getCameraRecognitionResult(image_resized1)
     if ch != '-':
