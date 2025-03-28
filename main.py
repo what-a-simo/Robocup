@@ -68,7 +68,7 @@ gps.enable(timeStep)
 
 
 #load model
-model = keras.models.load_model('testModel.keras')
+model = keras.models.load_model("AI/testModel.keras")
 
 
 # output dei sensori di distanza
@@ -215,7 +215,7 @@ def gpsValues():
 
 def printGpsValues():
     x, y = gpsValues()
-    print("X: " + str(x) + " - Y: " + str(y))
+    #print("X: " + str(x) + " - Y: " + str(y))
 
 
 def getCameraRecognitionResult(image):
@@ -262,7 +262,7 @@ def getImageCamera():
 
     width = camera1.getWidth()
     height = camera1.getHeight()
-    print(str(width) + " " + str(height))
+    #print(str(width) + " " + str(height))
 
     image_array1 = np.frombuffer(image1, dtype=np.uint8).reshape((height, width, 4))
 
@@ -308,11 +308,11 @@ def getScore():
 def navigate():
     while robot.step(timeStep) != -1:
         print(numToBlock(distanceSensorLeft.getValue()), numToBlock(distanceSensorFront.getValue()), numToBlock(distanceSensorRight.getValue()))
-        print(round(inertialUnit.getRollPitchYaw()[2], 1))
-        printGpsValues()
+        #print(round(inertialUnit.getRollPitchYaw()[2], 1))
+        #printGpsValues()
         getColour()
         getImageCamera()
-        getScore()
+        #getScore()
         if getColour() == "hole":
             stopMotors()
             hole()
@@ -335,7 +335,7 @@ def getColour():
     r = colorSensor.imageGetRed(image, 1, 0, 0)
     g = colorSensor.imageGetGreen(image, 1, 0, 0)
     b = colorSensor.imageGetBlue(image, 1, 0, 0)
-    print("r: " + str(r) + " g: " + str(g) + " b: " + str(b))
+    #print("r: " + str(r) + " g: " + str(g) + " b: " + str(b))
     if 203 <= r <= 233 and 170 <= g <= 200 and 93 <= b <= 123:
         print("Brown")
         return "brown"
