@@ -67,6 +67,10 @@ gps = robot.getDevice("gps")
 gps.enable(timeStep)
 
 
+#load model
+model = keras.models.load_model('testModel.keras')
+
+
 # output dei sensori di distanza
 def numToBlock(num):
     if num > 0.7:
@@ -232,6 +236,11 @@ def getImageCamera():
     image_resized2 = cv2.resize(image_rgb2, (64, 40))
     cv2.imwrite("captured_image_camera1.jpg", image_resized1)
     cv2.imwrite("captured_image_camera2.jpg", image_resized2)
+
+    image_resized1 = tf.image.decode_jpeg(image_resized1, channels=3)
+    image_resized1 = tf.image.resize(image_resized1, [64, 40])
+    image_resized1 = image_resized1 / 255.0
+    image_resized1 = tf.expand_dims(image_resized1, axis=0)
 
     output = model.predict(image_resized1)
     predictedClass = tf.argmax(output, axis=-1).numpy()[0]
