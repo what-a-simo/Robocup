@@ -8,7 +8,7 @@ import struct
 
 # timeStep e velocità massima
 timeStep = 32
-max_velocity = 5.1
+maxVelocity = 5.1
 rotation_speed = 5.0
 
 
@@ -17,15 +17,15 @@ robot = Robot()
 
 
 # dichiarazione ruota sinistra e ruota destra
-wheel_left = robot.getDevice("wheel2 motor")
-wheel_right = robot.getDevice("wheel1 motor")
+wheelLeft = robot.getDevice("wheel2 motor")
+wheelRight = robot.getDevice("wheel1 motor")
 
 
 # settare la posizione della ruota sinistra e della ruota destra
-wheel_left.setPosition(float("inf"))
-wheel_right.setPosition(float("inf"))
-wheel_right.setVelocity(0)
-wheel_left.setVelocity(0)
+wheelLeft.setPosition(float("inf"))
+wheelRight.setPosition(float("inf"))
+wheelRight.setVelocity(0)
+wheelLeft.setVelocity(0)
 
 
 # sensori di distanza frontale, destro e sinistro
@@ -94,28 +94,28 @@ start = robot.getTime()
 
 
 def forward():
-    wheel_left.setVelocity(max_velocity)
-    wheel_right.setVelocity(max_velocity)
+    wheelLeft.setVelocity(maxVelocity)
+    wheelRight.setVelocity(maxVelocity)
 
 
 def goBack():
-    wheel_left.setVelocity(-max_velocity)
-    wheel_right.setVelocity(-max_velocity)
+    wheelLeft.setVelocity(-maxVelocity)
+    wheelRight.setVelocity(-maxVelocity)
 
 
 def stopMotors():
-    wheel_left.setVelocity(0)
-    wheel_right.setVelocity(0)
+    wheelLeft.setVelocity(0)
+    wheelRight.setVelocity(0)
 
 
 def spinOnRight():
-    wheel_left.setVelocity(rotation_speed)
-    wheel_right.setVelocity(-rotation_speed)
+    wheelLeft.setVelocity(rotation_speed)
+    wheelRight.setVelocity(-rotation_speed)
 
 
 def spinOnLeft():
-    wheel_left.setVelocity(-rotation_speed)
-    wheel_right.setVelocity(rotation_speed)
+    wheelLeft.setVelocity(-rotation_speed)
+    wheelRight.setVelocity(rotation_speed)
 
 
 def nearWall():
@@ -135,24 +135,24 @@ def nearWallBack():
 
 def kebab():
     stopMotors()
-    target_orientation = 0.0
+    targetOrientation = 0.0
     spinOnLeft()
     while robot.step(timeStep) != -1:
-        current_orientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(current_orientation - target_orientation) < 0.04:
+        currentOrientation = inertialUnit.getRollPitchYaw()[2]
+        if abs(currentOrientation - targetOrientation) < 0.04:
             break
 
 
 def turnOnLeft():
     nearWall()
-    initial_orientation = inertialUnit.getRollPitchYaw()[2]
-    target_orientation = initial_orientation - math.radians(-90)
+    initialOrientation = inertialUnit.getRollPitchYaw()[2]
+    targetOrientation = initialOrientation - math.radians(-90)
     spinOnLeft()
     counter = 0
     while robot.step(timeStep) != -1:
         counter = counter + 1
-        current_orientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(current_orientation - target_orientation) < 0.02:
+        currentOrientation = inertialUnit.getRollPitchYaw()[2]
+        if abs(currentOrientation - targetOrientation) < 0.02:
             break
         elif counter == 70:
             kebab()
@@ -162,14 +162,14 @@ def turnOnLeft():
 
 def turnOnRight():
     nearWall()
-    initial_orientation = inertialUnit.getRollPitchYaw()[2]
-    target_orientation = initial_orientation - math.radians(90)
+    initialOrientation = inertialUnit.getRollPitchYaw()[2]
+    targetOrientation = initialOrientation - math.radians(90)
     spinOnRight()
     counter = 0
     while robot.step(timeStep) != -1:
         counter = counter + 1
-        current_orientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(current_orientation - target_orientation) < 0.02:
+        currentOrientation = inertialUnit.getRollPitchYaw()[2]
+        if abs(currentOrientation - targetOrientation) < 0.02:
             break
         elif counter == 70:
             kebab()
@@ -201,7 +201,7 @@ def hole():
     wallAhead()
 
 
-def gpsValues():
+def getGpsValues():
     position = gps.getValues()
     x = position[0] * 100
     y = position[2] * 100
@@ -209,17 +209,17 @@ def gpsValues():
 
 
 def printGpsValues():
-    x, y = gpsValues()
+    x, y = getGpsValues()
     #print("X: " + str(x) + " - Y: " + str(y))
 
 
 def getCameraRecognitionResult(image):
-    image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    image_gray = np.expand_dims(image_gray, axis=-1)
-    image_gray = image_gray / 255.0
-    image_gray = np.expand_dims(image_gray, axis=0)
+    imageGray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    imageGray = np.expand_dims(imageGray, axis=-1)
+    imageGray = imageGray / 255.0
+    imageGray = np.expand_dims(imageGray, axis=0)
 
-    output = model.predict(image_gray)
+    output = model.predict(imageGray)
     predictedClass = tf.argmax(output, axis=-1).numpy()[0]
     match predictedClass:
         case 0:
@@ -259,31 +259,31 @@ def getImageCamera():
     height = camera1.getHeight()
     #print(str(width) + " " + str(height))
 
-    image_array1 = np.frombuffer(image1, dtype=np.uint8).reshape((height, width, 4))
+    imageArray1 = np.frombuffer(image1, dtype=np.uint8).reshape((height, width, 4))
 
-    image_array2 = np.frombuffer(image2, dtype=np.uint8).reshape((height, width, 4))
+    imageArray2 = np.frombuffer(image2, dtype=np.uint8).reshape((height, width, 4))
 
-    image_rgb1 = cv2.cvtColor(image_array1, cv2.COLOR_RGBA2RGB)
-    image_rgb2 = cv2.cvtColor(image_array2, cv2.COLOR_RGBA2RGB)
-    image_resized1 = cv2.resize(image_rgb1, (64,40))
-    image_resized2 = cv2.resize(image_rgb2, (64, 40))
-    cv2.imwrite("captured_image_camera1.jpg", image_resized1)
-    cv2.imwrite("captured_image_camera2.jpg", image_resized2)
+    imageRgb1 = cv2.cvtColor(imageArray1, cv2.COLOR_RGBA2RGB)
+    imageRgb2 = cv2.cvtColor(imageArray2, cv2.COLOR_RGBA2RGB)
+    imageResized1 = cv2.resize(imageRgb1, (64,40))
+    imageResized2 = cv2.resize(imageRgb2, (64, 40))
+    cv2.imwrite("captured_image_camera1.jpg", imageResized1)
+    cv2.imwrite("captured_image_camera2.jpg", imageResized2)
 
-    image_resized1 = np.array(image_resized1, dtype=np.uint8)
-    image_resized2 = np.array(image_resized2, dtype=np.uint8)
+    imageResized1 = np.array(imageResized1, dtype=np.uint8)
+    imageResized2 = np.array(imageResized2, dtype=np.uint8)
 
-    ch = getCameraRecognitionResult(image_resized1)
+    ch = getCameraRecognitionResult(imageResized1)
     if ch != '-':
         score(ch)
-    ch = getCameraRecognitionResult(image_resized2)
+    ch = getCameraRecognitionResult(imageResized2)
     if ch != '-':
         score(ch)
 
 
 def score(ch):
     victimType = bytes(ch, "utf-8")
-    position = gpsValues()
+    position = getGpsValues()
     x = int(position[0])
     y = int(position[1])
     message = struct.pack("i i c", x, y, victimType)
