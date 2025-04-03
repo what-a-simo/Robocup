@@ -18,7 +18,6 @@ batch_size = 16
 # model = keras.Sequential([
 #     layers.Input((img_height,img_width,3)),
 #     layers.Conv2D(32,3, padding='same'),
-#     layers.Conv2D(32,3, padding='same'),
 #     layers.MaxPooling2D(),
 #     layers.Flatten(),
 #     layers.Dense(10),
@@ -64,19 +63,20 @@ batch_size = 16
 #     metrics=["accuracy"],
 # )
 #
-# model.fit(ds_train, epochs=10, verbose=2)
+# model.fit(ds_train, epochs=5, verbose=2)
 #
 # model.save('testModel.keras')
 
 model= keras.models.load_model('testModel.keras')
 
-image1 = tf.io.read_file("TestTraining/onlyWall/img2.png")
+image1 = tf.io.read_file("TestTraining/corrosive_Hazmat/image5_9_black_background.png")
 image1 = tf.image.decode_jpeg(image1, channels=3)
 image1 = tf.image.resize(image1, [64, 40])
 image1 = image1 / 255.0
 image1 = tf.expand_dims(image1, axis=0)
 
 output = model.predict(image1)
+print(output)
 predicted_class = tf.argmax(output, axis=-1).numpy()[0]
 match predicted_class:
     case 0:
