@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 import struct
+import time
 
 
 # timeStep e velocità massima
@@ -139,7 +140,7 @@ def kebab():
     spinOnLeft()
     while robot.step(timeStep) != -1:
         currentOrientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(currentOrientation - targetOrientation) < 0.04:
+        if abs(currentOrientation - targetOrientation) < 0.05:
             break
 
 
@@ -152,7 +153,7 @@ def turnOnLeft():
     while robot.step(timeStep) != -1:
         counter = counter + 1
         currentOrientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(currentOrientation - targetOrientation) < 0.02:
+        if abs(currentOrientation - targetOrientation) < 0.05:
             break
         elif counter == 70:
             kebab()
@@ -169,7 +170,7 @@ def turnOnRight():
     while robot.step(timeStep) != -1:
         counter = counter + 1
         currentOrientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(currentOrientation - targetOrientation) < 0.02:
+        if abs(currentOrientation - targetOrientation) < 0.05:
             break
         elif counter == 70:
             kebab()
@@ -191,6 +192,79 @@ def wallAhead():
         else:
             turnOnLeft()
             break
+
+
+def directionCorrection():
+    currentOrientation = inertialUnit.getRollPitchYaw()[2]
+    if 0.2 <= currentOrientation <= 1.4:
+        if currentOrientation <= 0.8: #nord
+            stopMotors()
+            targetOrientation = 0.0
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(currentOrientation2 - targetOrientation) < 0.05:
+                    return
+        else: #ovest
+            stopMotors()
+            targetOrientation = 1.6
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(currentOrientation2 - targetOrientation) < 0.05:
+                    return
+    if 1.8 <= currentOrientation <= 2.9:
+        if currentOrientation <= 2.2: #ovest
+            stopMotors()
+            targetOrientation = 1.6
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(currentOrientation2 - targetOrientation) < 0.05:
+                    return
+        else: #sud
+            stopMotors()
+            targetOrientation = 3.1
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(currentOrientation2 - targetOrientation) < 0.05:
+                    return
+    if -2.9 <= currentOrientation <= -1.8:
+        if currentOrientation <= -2.2: #sud
+            stopMotors()
+            targetOrientation = 3.1
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(currentOrientation2 - targetOrientation) < 0.05:
+                    return
+        else: #est
+            stopMotors()
+            targetOrientation = -1.6
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(currentOrientation2 - targetOrientation) < 0.05:
+                    return
+    if -1.4 <= currentOrientation <= -0.2:
+        if currentOrientation <= -0.8: #est
+            stopMotors()
+            targetOrientation = -1.6
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(currentOrientation2 - targetOrientation) < 0.05:
+                    return
+        else: #nord
+            stopMotors()
+            targetOrientation = 0.0
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(currentOrientation2 - targetOrientation) < 0.05:
+                    return
+    return
 
 
 def hole():
@@ -227,24 +301,31 @@ def getCameraRecognitionResult(image):
             return '1'
         case 1:
             print("Is flammable")
+            time.sleep(2)
             return 'F'
         case 2:
             print("Is an H")
+            time.sleep(2)
             return 'H'
         case 3:
             print("Is corrosive")
+            time.sleep(2)
             return 'C'
         case 4:
             print("Is organic")
+            time.sleep(2)
             return 'O'
         case 5:
             print("Is poison")
+            time.sleep(2)
             return 'P'
         case 6:
             print("Is an S")
+            time.sleep(2)
             return 'S'
         case 7:
             print("Is an U")
+            time.sleep(2)
             return 'U'
         case _:
             print("Undefined")
@@ -306,11 +387,12 @@ def getScore():
 def navigate():
     while robot.step(timeStep) != -1:
         print(numToBlock(distanceSensorLeft.getValue()), numToBlock(distanceSensorFront.getValue()), numToBlock(distanceSensorRight.getValue()))
-        #print(round(inertialUnit.getRollPitchYaw()[2], 1))
+        print(round(inertialUnit.getRollPitchYaw()[2], 1))
         #printGpsValues()
         getColour()
         getImageCamera()
         #getScore()
+        directionCorrection()
         if getColour() == "hole":
             stopMotors()
             hole()
