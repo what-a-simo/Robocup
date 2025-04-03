@@ -201,10 +201,6 @@ def hole():
     wallAhead()
 
 
-def stayedForTooLong():
-    forward()
-
-
 def gpsValues():
     position = gps.getValues()
     x = position[0] * 100
@@ -219,19 +215,16 @@ def printGpsValues():
 
 def getCameraRecognitionResult(image):
     image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-
     image_gray = np.expand_dims(image_gray, axis=-1)
-
     image_gray = image_gray / 255.0
-
     image_gray = np.expand_dims(image_gray, axis=0)
 
     output = model.predict(image_gray)
     predictedClass = tf.argmax(output, axis=-1).numpy()[0]
     match predictedClass:
         case 0:
-            print("Is corrosive")
-            return 'C'
+            print("Is a wall")
+            return '1'
         case 1:
             print("Is flammable")
             return 'F'
@@ -239,8 +232,8 @@ def getCameraRecognitionResult(image):
             print("Is an H")
             return 'H'
         case 3:
-            print("Is a wall")
-            return '1'
+            print("Is corrosive")
+            return 'C'
         case 4:
             print("Is organic")
             return 'O'
