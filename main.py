@@ -67,8 +67,12 @@ gps = robot.getDevice("gps")
 gps.enable(timeStep)
 
 
-#load model
+# load model
 model = tf.keras.models.load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/testModel.keras")
+
+
+# mapping
+map = np.array([[0]])
 
 
 # output dei sensori di distanza
@@ -144,38 +148,38 @@ def kebab():
             break
 
 
-def turnOnLeft():
-    nearWall()
-    initialOrientation = inertialUnit.getRollPitchYaw()[2]
-    targetOrientation = initialOrientation - math.radians(-90)
-    spinOnLeft()
-    counter = 0
-    while robot.step(timeStep) != -1:
-        counter = counter + 1
-        currentOrientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(currentOrientation - targetOrientation) < 0.05:
-            break
-        elif counter == 70:
-            kebab()
-            break
-    stopMotors()
+# def oldTurnOnLeft():
+#     nearWall()
+#     initialOrientation = inertialUnit.getRollPitchYaw()[2]
+#     targetOrientation = initialOrientation - math.radians(-90)
+#     spinOnLeft()
+#     counter = 0
+#     while robot.step(timeStep) != -1:
+#         counter = counter + 1
+#         currentOrientation = inertialUnit.getRollPitchYaw()[2]
+#         if abs(currentOrientation - targetOrientation) < 0.05:
+#             break
+#         elif counter == 70:
+#             kebab()
+#             break
+#     stopMotors()
 
 
-def turnOnRight():
-    nearWall()
-    initialOrientation = inertialUnit.getRollPitchYaw()[2]
-    targetOrientation = initialOrientation - math.radians(90)
-    spinOnRight()
-    counter = 0
-    while robot.step(timeStep) != -1:
-        counter = counter + 1
-        currentOrientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(currentOrientation - targetOrientation) < 0.05:
-            break
-        elif counter == 70:
-            kebab()
-            break
-    stopMotors()
+# def oldTurnOnRight():
+#     nearWall()
+#     initialOrientation = inertialUnit.getRollPitchYaw()[2]
+#     targetOrientation = initialOrientation - math.radians(90)
+#     spinOnRight()
+#     counter = 0
+#     while robot.step(timeStep) != -1:
+#         counter = counter + 1
+#         currentOrientation = inertialUnit.getRollPitchYaw()[2]
+#         if abs(currentOrientation - targetOrientation) < 0.05:
+#             break
+#         elif counter == 70:
+#             kebab()
+#             break
+#     stopMotors()
 
 
 def wallAhead():
@@ -183,15 +187,82 @@ def wallAhead():
         stopMotors()
         if distanceSensorRight.getValue() <= 0.5:
             print("wall on right")
-            turnOnLeft()
+            turnOnLeft2()
             break
         elif distanceSensorLeft.getValue() <= 0.5:
             print("wall on left")
-            turnOnRight()
+            turnOnRight2()
             break
         else:
-            turnOnLeft()
+            turnOnLeft2()
             break
+
+
+def turnOnLeft2():
+    currentOrientation = inertialUnit.getRollPitchYaw()[2]
+    if -0.2 <= currentOrientation <= 0.2:  #ovest
+        targetOrientation = 1.6
+        spinOnLeft()
+        while robot.step(timeStep) != -1:
+            currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+            if abs(currentOrientation2 - targetOrientation) < 0.05:
+                return
+    if -1.8 <= currentOrientation <= -1.4:  #nord
+        targetOrientation = 0.0
+        spinOnLeft()
+        while robot.step(timeStep) != -1:
+            currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+            if abs(currentOrientation2 - targetOrientation) < 0.05:
+                return
+    if -3.1 <= currentOrientation <= -2.9 or 2.9 <= currentOrientation <= 3.1:  #est
+        targetOrientation = -1.6
+        spinOnLeft()
+        while robot.step(timeStep) != -1:
+            currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+            if abs(currentOrientation2 - targetOrientation) < 0.05:
+                return
+    if 1.4 <= currentOrientation <= 1.8:  #sud
+        targetOrientation = 3.1
+        spinOnRight()
+        while robot.step(timeStep) != -1:
+            currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+            if abs(currentOrientation2 - targetOrientation) < 0.05:
+                return
+
+
+def turnOnRight2():
+    currentOrientation = inertialUnit.getRollPitchYaw()[2]
+    if -0.2 <= currentOrientation <= 0.2: #est
+        stopMotors()
+        targetOrientation = -1.6
+        spinOnRight()
+        while robot.step(timeStep) != -1:
+            currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+            if abs(currentOrientation2 - targetOrientation) < 0.05:
+                return
+    if -1.8 <= currentOrientation <= -1.4: #sud
+        stopMotors()
+        targetOrientation = 3.1
+        spinOnRight()
+        while robot.step(timeStep) != -1:
+            currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+            if abs(currentOrientation2 - targetOrientation) < 0.05:
+                return
+    if -3.1 <= currentOrientation <= -2.8 or 2.9 <= currentOrientation <= 3.1: #ovest
+        stopMotors()
+        targetOrientation = 1.6
+        spinOnRight()
+        while robot.step(timeStep) != -1:
+            currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+            if abs(currentOrientation2 - targetOrientation) < 0.05:
+                return
+    if 1.4 <= currentOrientation <= 1.8: #nord
+        targetOrientation = 0.0
+        spinOnRight()
+        while robot.step(timeStep) != -1:
+            currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+            if abs(currentOrientation2 - targetOrientation) < 0.05:
+                return
 
 
 def directionCorrection():
@@ -301,31 +372,31 @@ def getCameraRecognitionResult(image):
             return '1'
         case 1:
             print("Is flammable")
-            time.sleep(2)
+            #time.sleep(2)
             return 'F'
         case 2:
             print("Is an H")
-            time.sleep(2)
+            #time.sleep(2)
             return 'H'
         case 3:
             print("Is corrosive")
-            time.sleep(2)
+            #time.sleep(2)
             return 'C'
         case 4:
             print("Is organic")
-            time.sleep(2)
+            #time.sleep(2)
             return 'O'
         case 5:
             print("Is poison")
-            time.sleep(2)
+            #time.sleep(2)
             return 'P'
         case 6:
             print("Is an S")
-            time.sleep(2)
+            #time.sleep(2)
             return 'S'
         case 7:
             print("Is an U")
-            time.sleep(2)
+            #time.sleep(2)
             return 'U'
         case _:
             print("Undefined")
@@ -384,6 +455,10 @@ def getScore():
             receiver.nextPacket()
 
 
+def mapping():
+    print()
+
+
 def navigate():
     while robot.step(timeStep) != -1:
         print(numToBlock(distanceSensorLeft.getValue()), numToBlock(distanceSensorFront.getValue()), numToBlock(distanceSensorRight.getValue()))
@@ -400,10 +475,10 @@ def navigate():
             stopMotors()
             if distanceSensorRight.getValue() <= 0.1:
                 print("wall on right")
-                turnOnLeft()
+                turnOnLeft2()
             elif distanceSensorLeft.getValue() <= 0.1:
                 print("wall on left")
-                turnOnRight()
+                turnOnRight2()
             else:
                 print("wall ahead")
                 wallAhead()
