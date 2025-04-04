@@ -138,7 +138,7 @@ def nearWallBack():
             break
 
 
-def kebab():
+def turnTooMuch():
     stopMotors()
     targetOrientation = 0.0
     spinOnLeft()
@@ -160,7 +160,7 @@ def kebab():
 #         if abs(currentOrientation - targetOrientation) < 0.05:
 #             break
 #         elif counter == 70:
-#             kebab()
+#             turnTooMuch()
 #             break
 #     stopMotors()
 
@@ -177,7 +177,7 @@ def kebab():
 #         if abs(currentOrientation - targetOrientation) < 0.05:
 #             break
 #         elif counter == 70:
-#             kebab()
+#             turnTooMuch()
 #             break
 #     stopMotors()
 
@@ -186,11 +186,11 @@ def wallAhead():
     while robot.step(timeStep) != -1:
         stopMotors()
         if distanceSensorRight.getValue() <= 0.5:
-            print("wall on right")
+            #print("wall on right")
             turnOnLeft2()
             break
         elif distanceSensorLeft.getValue() <= 0.5:
-            print("wall on left")
+            #print("wall on left")
             turnOnRight2()
             break
         else:
@@ -199,6 +199,8 @@ def wallAhead():
 
 
 def turnOnLeft2():
+    stopMotors()
+    nearWall()
     currentOrientation = inertialUnit.getRollPitchYaw()[2]
     if -0.2 <= currentOrientation <= 0.2:  #ovest
         targetOrientation = 1.6
@@ -207,30 +209,33 @@ def turnOnLeft2():
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
             if abs(currentOrientation2 - targetOrientation) < 0.05:
                 return
-    if -1.8 <= currentOrientation <= -1.4:  #nord
+    elif -1.8 <= currentOrientation <= -1.4:  #nord
         targetOrientation = 0.0
         spinOnLeft()
         while robot.step(timeStep) != -1:
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
             if abs(currentOrientation2 - targetOrientation) < 0.05:
                 return
-    if -3.1 <= currentOrientation <= -2.9 or 2.9 <= currentOrientation <= 3.1:  #est
+    elif -3.2 <= currentOrientation <= -2.9 or 2.9 <= currentOrientation <= 3.2:  #est
         targetOrientation = -1.6
         spinOnLeft()
         while robot.step(timeStep) != -1:
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
             if abs(currentOrientation2 - targetOrientation) < 0.05:
                 return
-    if 1.4 <= currentOrientation <= 1.8:  #sud
+    elif 1.4 <= currentOrientation <= 1.8:  #sud
         targetOrientation = 3.1
         spinOnRight()
         while robot.step(timeStep) != -1:
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
             if abs(currentOrientation2 - targetOrientation) < 0.05:
                 return
+    return
 
 
 def turnOnRight2():
+    stopMotors()
+    nearWall()
     currentOrientation = inertialUnit.getRollPitchYaw()[2]
     if -0.2 <= currentOrientation <= 0.2: #est
         stopMotors()
@@ -248,7 +253,7 @@ def turnOnRight2():
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
             if abs(currentOrientation2 - targetOrientation) < 0.05:
                 return
-    if -3.1 <= currentOrientation <= -2.8 or 2.9 <= currentOrientation <= 3.1: #ovest
+    if -3.2 <= currentOrientation <= -2.8 or 2.9 <= currentOrientation <= 3.2: #ovest
         stopMotors()
         targetOrientation = 1.6
         spinOnRight()
@@ -263,6 +268,7 @@ def turnOnRight2():
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
             if abs(currentOrientation2 - targetOrientation) < 0.05:
                 return
+    return
 
 
 def directionCorrection():
@@ -355,7 +361,7 @@ def getGpsValues():
 
 def printGpsValues():
     x, y = getGpsValues()
-    #print("X: " + str(x) + " - Y: " + str(y))
+    print("X: " + str(x) + " - Y: " + str(y))
 
 
 def getCameraRecognitionResult(image):
@@ -492,43 +498,43 @@ def getColour():
     b = colorSensor.imageGetBlue(image, 1, 0, 0)
     #print("r: " + str(r) + " g: " + str(g) + " b: " + str(b))
     if 203 <= r <= 233 and 170 <= g <= 200 and 93 <= b <= 123:
-        print("Brown")
+        #print("Brown")
         return "brown"
     if 0 <= r <= 30 and 0 <= g <= 30 and 0 <= b <= 30:
-        print("Black")
+        #print("Black")
         return "black"
     if 225 <= r <= 255 and 50 <= g <= 80 and 50 <= b <= 80:
-        print("Red")
+        #print("Red")
         return "red"
     if 20 <= r <= 50 and 225 <= g <= 255 and 20 <= b <= 50:
-        print("Green")
+        #print("Green")
         return "green"
     if 50 <= r <= 80 and 50 <= g <= 80 and 225 <= b <= 255:
-        print("Blue")
+        #print("Blue")
         return "blue"
     if 113 <= r <= 173 and 56 <= g <= 79 and 225 <= b <= 255:
-        print("Purple")
+        #print("Purple")
         return "purple"
     if 120 <= r <= 180 and 120 <= g <= 180 and 120 <= b <= 180:
-        print("Gray")
+        #print("Gray")
         return "gray"
     if 29 <= r <= 59 and 33 <= g <= 63 and 46 <= b <= 76:
-        print("Checkpoint")
+        #print("Checkpoint")
         return "checkpoint"
     if 93 <= r <= 123 and 93 <= g <= 123 and 93 <= b <= 123:
-        print("Hole border")
+        #print("Hole border")
         return "hole"
     if 225 <= r <= 255 and 225 <= g <= 255 and 225 <= b <= 255:
-        print("White")
+        #print("White")
         return "white"
     if 86 <= r <= 116 and 177 <= g <= 127 and 191 <= b <= 221:
-        print("Wall")
+        #print("Wall")
         return "wall"
     if 42 <= r <= 46 and 42 <= g <= 46 and 42 <= b <= 46:
-        print("Wall Black")
+        #print("Wall Black")
         return  "wallB"
     if 126 <= r <= 234 and 222 <= g <= 255 and 231 <= b <= 255:
-        print("Strange wall")
+        #print("Strange wall")
         return  "wallS"
     #height = colorSensor.getHeight()
     #width = colorSensor.getWidth()
