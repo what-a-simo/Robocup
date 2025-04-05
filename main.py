@@ -6,7 +6,6 @@ import tensorflow as tf
 import struct
 import time
 
-
 # timeStep e velocità massima
 timeStep = 32
 maxVelocity = 5.1
@@ -140,7 +139,7 @@ def nearWallBack():
 
 def turnTooMuch():
     stopMotors()
-    targetOrientation = 0.0
+    targetOrientation = 3.1
     spinOnLeft()
     while robot.step(timeStep) != -1:
         currentOrientation = inertialUnit.getRollPitchYaw()[2]
@@ -224,11 +223,16 @@ def turnOnLeft2():
             if abs(currentOrientation2 - targetOrientation) < 0.05:
                 return
     elif 1.4 <= currentOrientation <= 1.8:  #sud
-        targetOrientation = 3.1
+        targetOrientation = 3.2
         spinOnRight()
+        counter = 0
         while robot.step(timeStep) != -1:
+            counter = counter + 1
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
             if abs(currentOrientation2 - targetOrientation) < 0.05:
+                return
+            elif counter == 50:
+                turnTooMuch()
                 return
     return
 
@@ -247,11 +251,16 @@ def turnOnRight2():
                 return
     if -1.8 <= currentOrientation <= -1.4: #sud
         stopMotors()
-        targetOrientation = 3.1
+        targetOrientation = 3.2
         spinOnRight()
+        counter = 0
         while robot.step(timeStep) != -1:
+            counter = counter + 1
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
             if abs(currentOrientation2 - targetOrientation) < 0.05:
+                return
+            elif counter == 50:
+                turnTooMuch()
                 return
     if -3.2 <= currentOrientation <= -2.8 or 2.9 <= currentOrientation <= 3.2: #ovest
         stopMotors()
@@ -301,20 +310,30 @@ def directionCorrection():
                     return
         else: #sud
             stopMotors()
-            targetOrientation = 3.1
+            targetOrientation = 3.2
             spinOnLeft()
+            counter = 0
             while robot.step(timeStep) != -1:
+                counter = counter + 1
                 currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
                 if abs(currentOrientation2 - targetOrientation) < 0.05:
+                    return
+                elif counter == 50:
+                    turnTooMuch()
                     return
     if -2.9 <= currentOrientation <= -1.8:
         if currentOrientation <= -2.2: #sud
             stopMotors()
-            targetOrientation = 3.1
+            targetOrientation = 3.2
             spinOnLeft()
+            counter = 0
             while robot.step(timeStep) != -1:
+                counter = counter + 1
                 currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
                 if abs(currentOrientation2 - targetOrientation) < 0.05:
+                    return
+                elif counter == 50:
+                    turnTooMuch()
                     return
         else: #est
             stopMotors()
@@ -345,8 +364,8 @@ def directionCorrection():
 
 
 def hole():
+    goBack()
     while robot.step(timeStep) != -1:
-        goBack()
         if getColour() == "white":
             break
     wallAhead()
@@ -432,10 +451,10 @@ def getImageCamera():
     imageResized2 = np.array(imageResized2, dtype=np.uint8)
 
     ch = getCameraRecognitionResult(imageResized1)
-    if ch != '-':
+    if ch != '-' or ch != '1':
         score(ch)
     ch = getCameraRecognitionResult(imageResized2)
-    if ch != '-':
+    if ch != '-' or ch != '1':
         score(ch)
 
 
@@ -455,7 +474,7 @@ def getScore():
         receivedData = receiver.getBytes()
         tup = struct.unpack('c f i', receivedData)
         if tup[0].decode("utf-8") == 'G':
-            #if tup[2] == 5:
+            #if int(tup[2]) == 5:
             #    emitter.send(bytes('E', "utf-8"))
             print(f'Game Score: {tup[1]}  Remaining time: {tup[2]}')
             receiver.nextPacket()
@@ -477,7 +496,7 @@ def navigate():
         if getColour() == "hole":
             stopMotors()
             hole()
-        if distanceSensorFront.getValue() <= 0.1:
+        if distanceSensorFront.getValue() <= 0.2:
             stopMotors()
             if distanceSensorRight.getValue() <= 0.1:
                 print("wall on right")
@@ -540,8 +559,12 @@ def getColour():
     #width = colorSensor.getWidth()
 
 
+counterTime = 0
+
+
 # main
 def main():
+    global counterTime
     while robot.step(timeStep) != -1:
         navigate()
 
