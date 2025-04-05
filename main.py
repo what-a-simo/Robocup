@@ -384,13 +384,11 @@ def printGpsValues():
 
 
 def getCameraRecognitionResult(image):
-    imageGray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    imageGray = np.expand_dims(imageGray, axis=-1)
-    imageGray = imageGray / 255.0
-    imageGray = np.expand_dims(imageGray, axis=0)
+    image = image.astype(np.float32) / 255.0
+    image = np.expand_dims(image, axis=0)
 
-    output = model.predict(imageGray)
-    predictedClass = tf.argmax(output, axis=-1).numpy()[0]
+    output = model.predict(image)
+    predictedClass = np.argmax(output)
     match predictedClass:
         case 0:
             print("Is a wall")
