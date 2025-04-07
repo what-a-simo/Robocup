@@ -558,12 +558,8 @@ def getColour():
     #width = colorSensor.getWidth()
 
 
-counterTime = 0
-
-
 # main
 def main():
-    global counterTime
     while robot.step(timeStep) != -1:
         navigate()
 
