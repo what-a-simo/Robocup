@@ -147,39 +147,6 @@ def turnTooMuch():
             break
 
 
-# def oldTurnOnLeft():
-#     nearWall()
-#     initialOrientation = inertialUnit.getRollPitchYaw()[2]
-#     targetOrientation = initialOrientation - math.radians(-90)
-#     spinOnLeft()
-#     counter = 0
-#     while robot.step(timeStep) != -1:
-#         counter = counter + 1
-#         currentOrientation = inertialUnit.getRollPitchYaw()[2]
-#         if abs(currentOrientation - targetOrientation) < 0.05:
-#             break
-#         elif counter == 70:
-#             turnTooMuch()
-#             break
-#     stopMotors()
-
-
-# def oldTurnOnRight():
-#     nearWall()
-#     initialOrientation = inertialUnit.getRollPitchYaw()[2]
-#     targetOrientation = initialOrientation - math.radians(90)
-#     spinOnRight()
-#     counter = 0
-#     while robot.step(timeStep) != -1:
-#         counter = counter + 1
-#         currentOrientation = inertialUnit.getRollPitchYaw()[2]
-#         if abs(currentOrientation - targetOrientation) < 0.05:
-#             break
-#         elif counter == 70:
-#             turnTooMuch()
-#             break
-#     stopMotors()
-
 
 def wallAhead():
     while robot.step(timeStep) != -1:
@@ -493,6 +460,7 @@ def navigate():
         #getScore()
         directionCorrection()
         if getColour() == "hole":
+            print("dsjdnsfbsdkjfdbkjdsffbjkes")
             stopMotors()
             hole()
         if distanceSensorFront.getValue() <= 0.2:
