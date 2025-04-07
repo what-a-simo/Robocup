@@ -391,35 +391,36 @@ def getCameraRecognitionResult(image):
     predictedClass = np.argmax(output)
     match predictedClass:
         case 0:
-            print("Is a wall")
-            return '1'
+            print("Is corrosive")
+            # time.sleep(2)
+            return 'C'
         case 1:
             print("Is flammable")
-            #time.sleep(2)
+            # time.sleep(2)
             return 'F'
         case 2:
             print("Is an H")
-            #time.sleep(2)
+            # time.sleep(2)
             return 'H'
         case 3:
-            print("Is corrosive")
-            #time.sleep(2)
-            return 'C'
+            print("Is a wall")
+            # time.sleep(2)
+            return '1'
         case 4:
             print("Is organic")
-            #time.sleep(2)
+            # time.sleep(2)
             return 'O'
         case 5:
             print("Is poison")
-            #time.sleep(2)
+            # time.sleep(2)
             return 'P'
         case 6:
             print("Is an S")
-            #time.sleep(2)
+            # time.sleep(2)
             return 'S'
         case 7:
             print("Is an U")
-            #time.sleep(2)
+            # time.sleep(2)
             return 'U'
         case _:
             print("Undefined")
