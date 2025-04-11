@@ -172,7 +172,7 @@ def turnOnLeft2():
     nearWall()
     currentOrientation = inertialUnit.getRollPitchYaw()[2]
     if -0.2 <= currentOrientation <= 0.2:  #ovest
-        targetOrientation = 1.6
+        targetOrientation = math.pi/2
         spinOnLeft()
         while robot.step(timeStep) != -1:
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
@@ -186,14 +186,14 @@ def turnOnLeft2():
             if abs(currentOrientation2 - targetOrientation) < 0.05:
                 return
     elif -3.2 <= currentOrientation <= -2.9 or 2.9 <= currentOrientation <= 3.2:  #est
-        targetOrientation = -1.6
+        targetOrientation = -(math.pi/2)
         spinOnLeft()
         while robot.step(timeStep) != -1:
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
             if abs(currentOrientation2 - targetOrientation) < 0.05:
                 return
     elif 1.4 <= currentOrientation <= 1.8:  #sud
-        targetOrientation = 3.2
+        targetOrientation = math.pi
         spinOnRight()
         counter = 0
         while robot.step(timeStep) != -1:
@@ -213,7 +213,7 @@ def turnOnRight2():
     currentOrientation = inertialUnit.getRollPitchYaw()[2]
     if -0.2 <= currentOrientation <= 0.2: #est
         stopMotors()
-        targetOrientation = -1.6
+        targetOrientation = -(math.pi/2)
         spinOnRight()
         while robot.step(timeStep) != -1:
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
@@ -221,7 +221,7 @@ def turnOnRight2():
                 return
     if -1.8 <= currentOrientation <= -1.4: #sud
         stopMotors()
-        targetOrientation = 3.2
+        targetOrientation = math.pi
         spinOnRight()
         counter = 0
         while robot.step(timeStep) != -1:
@@ -234,7 +234,7 @@ def turnOnRight2():
                 return
     if -3.2 <= currentOrientation <= -2.8 or 2.9 <= currentOrientation <= 3.2: #ovest
         stopMotors()
-        targetOrientation = 1.6
+        targetOrientation = math.pi/2
         spinOnRight()
         while robot.step(timeStep) != -1:
             currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
@@ -263,7 +263,7 @@ def directionCorrection():
                     return
         else: #ovest
             stopMotors()
-            targetOrientation = 1.6
+            targetOrientation = math.pi/2
             spinOnLeft()
             while robot.step(timeStep) != -1:
                 currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
@@ -272,7 +272,7 @@ def directionCorrection():
     if 1.8 <= currentOrientation <= 2.9:
         if currentOrientation <= 2.2: #ovest
             stopMotors()
-            targetOrientation = 1.6
+            targetOrientation = math.pi/2
             spinOnLeft()
             while robot.step(timeStep) != -1:
                 currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
@@ -280,7 +280,7 @@ def directionCorrection():
                     return
         else: #sud
             stopMotors()
-            targetOrientation = 3.2
+            targetOrientation = math.pi
             spinOnLeft()
             counter = 0
             while robot.step(timeStep) != -1:
@@ -294,7 +294,7 @@ def directionCorrection():
     if -2.9 <= currentOrientation <= -1.8:
         if currentOrientation <= -2.2: #sud
             stopMotors()
-            targetOrientation = 3.2
+            targetOrientation = math.pi
             spinOnLeft()
             counter = 0
             while robot.step(timeStep) != -1:
@@ -307,7 +307,7 @@ def directionCorrection():
                     return
         else: #est
             stopMotors()
-            targetOrientation = -1.6
+            targetOrientation = -(math.pi/2)
             spinOnLeft()
             while robot.step(timeStep) != -1:
                 currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
@@ -316,7 +316,7 @@ def directionCorrection():
     if -1.4 <= currentOrientation <= -0.2:
         if currentOrientation <= -0.8: #est
             stopMotors()
-            targetOrientation = -1.6
+            targetOrientation = -(math.pi/2)
             spinOnLeft()
             while robot.step(timeStep) != -1:
                 currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
@@ -428,6 +428,7 @@ def getImageCamera():
 
 
 def score(ch):
+    print("----------------------------------------------------")
     victimType = bytes(ch, "utf-8")
     position = getGpsValues()
     x = int(position[0])
