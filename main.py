@@ -363,38 +363,38 @@ def getCameraRecognitionResult(image):
         case 0:
             print("Is corrosive")
             # time.sleep(2)
-            return 'C'
+            return "C"
         case 1:
             print("Is flammable")
             # time.sleep(2)
-            return 'F'
+            return "F"
         case 2:
             print("Is an H")
             # time.sleep(2)
-            return 'H'
+            return "H"
         case 3:
             print("Is a wall")
             # time.sleep(2)
-            return '1'
+            return "1"
         case 4:
             print("Is organic")
             # time.sleep(2)
-            return 'O'
+            return "0"
         case 5:
             print("Is poison")
             # time.sleep(2)
-            return 'P'
+            return "P"
         case 6:
             print("Is an S")
             # time.sleep(2)
-            return 'S'
+            return "S"
         case 7:
             print("Is an U")
             # time.sleep(2)
-            return 'U'
+            return "U"
         case _:
             print("Undefined")
-            return '-'
+            return "-"
 
 
 def getImageCamera():
@@ -423,14 +423,22 @@ def getImageCamera():
     imageResized2 = tf.image.resize(imageResized2, [64, 40])
 
     ch = getCameraRecognitionResult(imageResized1)
-    if ch != '-' or ch != '1':
+    #print(ch)
+    if ch != "-" and ch != "1":
+        stopMotors()
+        #print("is in if")
         score(ch)
     ch = getCameraRecognitionResult(imageResized2)
-    if ch != '-' or ch != '1':
+    #print(ch)
+    if ch != "-" and ch != "1":
+        stopMotors()
+        #print("is in if")
         score(ch)
+
 
 
 def score(ch):
+    stopMotors()
     victimType = bytes(ch, "utf-8")
     position = getGpsValues()
     x = int(position[0])
@@ -450,10 +458,6 @@ def getScore():
             #    emitter.send(bytes('E', "utf-8"))
             print(f'Game Score: {tup[1]}  Remaining time: {tup[2]}')
             receiver.nextPacket()
-
-
-def mapping():
-    print()
 
 
 def navigate():
