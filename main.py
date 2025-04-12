@@ -406,29 +406,23 @@ def getImageCamera():
     #print(str(width) + " " + str(height))
 
     imageArray1 = np.frombuffer(image1, dtype=np.uint8).reshape((height, width, 4))
-
     imageArray2 = np.frombuffer(image2, dtype=np.uint8).reshape((height, width, 4))
 
     image1 = cv2.cvtColor(imageArray1, cv2.COLOR_RGBA2RGB)
     image2 = cv2.cvtColor(imageArray2, cv2.COLOR_RGBA2RGB)
-    cv2.imwrite("captured_image_camera1.jpg", image1)
-    cv2.imwrite("captured_image_camera2.jpg", image2)
+    image1 = tf.image.resize(image1,[64,40])
+    image2 = tf.image.resize(image2, [64, 40])
+    
+    image1 = image1.astype(np.float32) / 255.0
+    image2 = image2.astype(np.float32) / 255.0
 
-    imageResized1 = tf.io.read_file("captured_image_camera1.jpg")
-    imageResized1 = tf.image.decode_jpeg(imageResized1, channels=3)
-    imageResized1 = tf.image.resize(imageResized1,[64,40])
-
-    imageResized2 = tf.io.read_file("captured_image_camera2.jpg")
-    imageResized2 = tf.image.decode_jpeg(imageResized2, channels=3)
-    imageResized2 = tf.image.resize(imageResized2, [64, 40])
-
-    ch = getCameraRecognitionResult(imageResized1)
+    ch = getCameraRecognitionResult(image1)
     #print(ch)
     if ch != "-" and ch != "1":
         stopMotors()
         #print("is in if")
         score(ch)
-    ch = getCameraRecognitionResult(imageResized2)
+    ch = getCameraRecognitionResult(image2)
     #print(ch)
     if ch != "-" and ch != "1":
         stopMotors()
