@@ -424,19 +424,10 @@ def getImageCamera():
 
     ch = getCameraRecognitionResult(imageResized1)
     if ch != '-' or ch != '1':
-        counter = 0
-        while counter < 10:
-            counter = counter + 1
-            stopMotors()
-            score(ch)
+        score(ch)
     ch = getCameraRecognitionResult(imageResized2)
     if ch != '-' or ch != '1':
-        counter = 0
-        while counter < 10:
-            counter = counter + 1
-            stopMotors()
-            score(ch)
-    forward()
+        score(ch)
 
 
 def score(ch):
