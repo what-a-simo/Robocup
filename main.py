@@ -2,10 +2,11 @@ from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS, Emitt
 import struct
 import math
 
-# timeStep e velocità massima
+# variabili generali o globali
 timeStep = 32
 max_velocity = 5.1
 rotation_speed = 5.0
+maxLidarDistance = 0.14
 
 # creazione robot
 robot = Robot()
@@ -54,7 +55,6 @@ gps.enable(timeStep)
 # lidar
 lidar = robot.getDevice("lidar")
 lidar.enable(timeStep)
-maxLidarDistance = 0.14
 
 
 start = robot.getTime()
@@ -161,12 +161,15 @@ def getlidarDistance():
 # main
 def main():
     while robot.step(timeStep) != -1:
-        forward()
-        rangeImage = lidar.getRangeImage()
-        for i in list(range(1023, 1034)) + list(range(1525, 1536)):
-            if i < len(rangeImage) and rangeImage[i] < maxLidarDistance:
-                print(f"i {i}: {round(rangeImage[i], 3)} ", end='')
-
+        lidarArray = lidar.getRangeImage()
+        avgDistance = 0.0
+        print("-----------------------------------")
+        for i in list(range(1023,1038)) + list(range(1520,1535)):
+            if lidarArray[i] < maxLidarDistance:
+                avgDistance += lidarArray[i]
+                print(f"i {i-1023}: {round(lidarArray[i],3)} ")
+        avgDistance /= 30
+        print(f"The average distance is :  {round(avgDistance,3)}")
 
 if __name__ == "__main__":
     main()
