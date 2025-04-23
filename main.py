@@ -152,14 +152,6 @@ def getColour():
 
 
 def getlidarDistance():
-    rangeImage = lidar.getRangeImage()
-    for i in range(2 * int(len(rangeImage) / 4), 3 * int(len(rangeImage) / 4)):
-        if rangeImage[i] < maxLidarDistance and (1023 <= i <= 1033 or 1525 <= i <= 1535):
-            print("i " + str(i - 1024) + ": " + str(round(rangeImage[i], 3)) + " ", end='')
-
-
-# main
-def main():
     while robot.step(timeStep) != -1:
         lidarArray = lidar.getRangeImage()
         avgDistance = 0.0
@@ -167,9 +159,18 @@ def main():
         for i in list(range(1023,1038)) + list(range(1520,1535)):
             if lidarArray[i] < maxLidarDistance:
                 avgDistance += lidarArray[i]
-                print(f"i {i-1023}: {round(lidarArray[i],3)} ")
+                #print(f"i {i-1023}: {round(lidarArray[i],3)} ")
         avgDistance /= 30
         print(f"The average distance is :  {round(avgDistance,3)}")
+        return avgDistance
+
+# main
+def main():
+    while robot.step(timeStep) != -1:
+        if getlidarDistance() <= 0.05:
+            stopMotors()
+        forward()
+
 
 if __name__ == "__main__":
     main()
