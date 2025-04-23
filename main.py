@@ -2,24 +2,29 @@ from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS, Emitt
 import struct
 import math
 
+
 # variabili generali o globali
 timeStep = 32
 max_velocity = 5.1
 rotation_speed = 5.0
 maxLidarDistance = 0.14
 
+
 # creazione robot
 robot = Robot()
+
 
 # dichiarazione ruota sinistra e ruota destra
 wheel_left = robot.getDevice("wheel2 motor")
 wheel_right = robot.getDevice("wheel1 motor")
+
 
 # settare la posizione della ruota sinistra e della ruota destra
 wheel_left.setPosition(float("inf"))
 wheel_right.setPosition(float("inf"))
 wheel_right.setVelocity(0)
 wheel_left.setVelocity(0)
+
 
 # sensori di distanza frontale, destro e sinistro
 distanceSensorRight = robot.getDevice("distance sensor1")
@@ -29,28 +34,34 @@ distanceSensorRight.enable(timeStep)
 distanceSensorLeft.enable(timeStep)
 distanceSensorFront.enable(timeStep)
 
-# Camera
+
+# camera
 cameraRight = robot.getDevice("camera1")
 camera2 = robot.getDevice("camera2")
 cameraRight.enable(timeStep)
 camera2.enable(timeStep)
 
+
 # inertial unit
 inertialUnit = robot.getDevice("inertial_unit")
 inertialUnit.enable(timeStep)
 
+
 # sensore di colore
 colourSensor = robot.getDevice("colour_sensor")
 colourSensor.enable(timeStep)
+
 
 # emitter e receiver
 receiver = robot.getDevice("receiver")
 emitter = robot.getDevice("emitter")
 receiver.enable(timeStep)
 
+
 # GPS
 gps = robot.getDevice("gps")
 gps.enable(timeStep)
+
 
 # lidar
 lidar = robot.getDevice("lidar")
@@ -130,45 +141,84 @@ def getColour():
     if 126 <= r <= 234 and 222 <= g <= 255 and 231 <= b <= 255:
         print("Strange wall")
         return "wallS"
-    # height = colorSensor.getHeight()
-    # width = colorSensor.getWidth()
 
 
-# def getPP(withRot=False):  # da mettere apposto
-#     global rLidar
-#     if rLidar == None:
-#         rLidar = lidar.getRangeImage()
-#     pp = []
-#     ppRot = []
-#     for i in range(2 * int(len(rLidar) / 4), 3 * int(len(rLidar) / 4)):  # [0,511]:
-#         if rLidar[i] < maxDisLidar:
-#             rot = ((i) / (len(rLidar) / 4)) * math.tau - verticalRotation
-#             pp.append(V2(-math.sin(rot) * rLidar[i], -math.cos(rot) * rLidar[i]))
-#             ppRot.append(-rot - (math.pi / 2))
-#     if withRot:
-#         return [pp, ppRot]
-#     else:
-#         return pp
+def getLidarDistanceFront():
+    lidarArray = lidar.getRangeImage()
+    avgDistance = 0.0
+    rightValue = 0
+    # print("-----------------------------------")
+    for i in list(range(1023,1055)) + list(range(1503,1535)):
+        if lidarArray[i] < maxLidarDistance:
+            avgDistance += lidarArray[i]
+            rightValue += 1
+            # print(f"i {i-1023}: {round(lidarArray[i],3)} ")
+    if rightValue <= 10:
+        return 1.0
+    avgDistance = round(avgDistance / rightValue,3)
+    print(f"The average front distance is :  {avgDistance}")
+    return avgDistance
 
 
-def getlidarDistance():
-    while robot.step(timeStep) != -1:
-        lidarArray = lidar.getRangeImage()
-        avgDistance = 0.0
-        print("-----------------------------------")
-        for i in list(range(1023,1038)) + list(range(1520,1535)):
-            if lidarArray[i] < maxLidarDistance:
-                avgDistance += lidarArray[i]
-                #print(f"i {i-1023}: {round(lidarArray[i],3)} ")
-        avgDistance /= 30
-        print(f"The average distance is :  {round(avgDistance,3)}")
-        return avgDistance
+def getLidarDistanceRight():
+    lidarArray = lidar.getRangeImage()
+    avgDistance = 0.0
+    rightValue = 0
+    # print("-----------------------------------")
+    for i in range(1119,1183):
+        if lidarArray[i] < maxLidarDistance:
+            avgDistance += lidarArray[i]
+            rightValue += 1
+            # print(f"i {i-1023}: {round(lidarArray[i],3)} ")
+    if rightValue <= 10:
+        return 1.0
+    avgDistance = round(avgDistance / rightValue, 3)
+    print(f"The average right distance is :  {avgDistance}")
+    return avgDistance
 
-# main
+
+
+def getLidarDistanceBack():
+    lidarArray = lidar.getRangeImage()
+    avgDistance = 0.0
+    rightValue = 0
+    # print("-----------------------------------")
+    for i in range(1247,1311):
+        if lidarArray[i] < maxLidarDistance:
+            avgDistance += lidarArray[i]
+            rightValue += 1
+            # print(f"i {i-1023}: {round(lidarArray[i],3)} ")
+    if rightValue <= 10:
+        return 1.0
+    avgDistance = round(avgDistance / rightValue, 3)
+    print(f"The average back distance is :  {avgDistance}")
+    return avgDistance
+
+
+def getLidarDistanceLeft():
+    lidarArray = lidar.getRangeImage()
+    avgDistance = 0.0
+    rightValue = 0
+    # print("-----------------------------------")
+    for i in range(1375,1439):
+        if lidarArray[i] < maxLidarDistance:
+            avgDistance += lidarArray[i]
+            rightValue += 1
+            # print(f"i {i-1023}: {round(lidarArray[i],3)} ")
+    if rightValue <= 10:
+        return 1.0
+    avgDistance = round(avgDistance / rightValue, 3)
+    print(f"The average left distance is :  {avgDistance}")
+    return avgDistance
+
+
 def main():
     while robot.step(timeStep) != -1:
-        if getlidarDistance() <= 0.05:
+        if getColour() == "hole":
+            goBack()
+        if getLidarDistanceFront() <= 0.065:
             stopMotors()
+            continue
         forward()
 
 
