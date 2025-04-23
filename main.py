@@ -212,12 +212,68 @@ def getLidarDistanceLeft():
     return avgDistance
 
 
+def turnLeft():
+    currentOrientation = inertialUnit.getRollPitchYaw()[2]
+    targetOrientation = 0.0
+    if -0.1 <= currentOrientation <= 0.1: # nord
+        print("nord")
+        targetOrientation = math.pi/2
+        spinOnLeft()
+    elif (math.pi/2 - 0.1) <= currentOrientation <= (math.pi/2 + 0.1): # ovest
+        print("ovest")
+        targetOrientation = math.pi
+        spinOnLeft()
+    elif -math.pi <= currentOrientation <= (-math.pi + 0.1) or (math.pi - 0.1) <= currentOrientation <= math.pi: # sud
+        print("sud")
+        targetOrientation = -(math.pi / 2)
+        spinOnLeft()
+    elif (-(math.pi/2) - 0.1) <= currentOrientation <= (-(math.pi/2) + 0.1): # est
+        print("est")
+        targetOrientation = 0.0
+        spinOnLeft()
+    while robot.step(timeStep) != -1:
+        newCurrentOrientation = inertialUnit.getRollPitchYaw()[2]
+        if abs(newCurrentOrientation - targetOrientation) < 0.05:
+            return
+
+
+def turnRight():
+    currentOrientation = inertialUnit.getRollPitchYaw()[2]
+    targetOrientation = 0.0
+    if -0.1 <= currentOrientation <= 0.1: # nord
+        print("nord")
+        targetOrientation = -(math.pi/2)
+        spinOnRight()
+    elif (-(math.pi/2) - 0.1) <= currentOrientation <= (-(math.pi/2) + 0.1): # est
+        print("est")
+        targetOrientation = math.pi
+        spinOnRight()
+    elif -math.pi <= currentOrientation <= (-math.pi + 0.1) or (math.pi - 0.1) <= currentOrientation <= math.pi: # sud
+        print("sud")
+        targetOrientation = math.pi/2
+        spinOnRight()
+    elif (math.pi/2 - 0.1) <= currentOrientation <= (math.pi/2 + 0.1): # ovest
+        print("ovest")
+        targetOrientation = 0.0
+        spinOnRight()
+    while robot.step(timeStep) != -1:
+        newCurrentOrientation = inertialUnit.getRollPitchYaw()[2]
+        if abs(newCurrentOrientation - targetOrientation) < 0.05:
+            return
+
+
 def main():
     while robot.step(timeStep) != -1:
         if getColour() == "hole":
             goBack()
         if getLidarDistanceFront() <= 0.065:
             stopMotors()
+            if getLidarDistanceRight() <= 0.08:
+                print("spin on left")
+                turnLeft()
+            elif getLidarDistanceLeft() <= 0.08:
+                print("spin on right")
+                turnRight()
             continue
         forward()
 
