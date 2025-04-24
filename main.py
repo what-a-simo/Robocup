@@ -1,4 +1,6 @@
 from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS, Emitter, Lidar
+import cv2
+import numpy as np
 import struct
 import math
 
@@ -177,7 +179,6 @@ def getLidarDistanceRight():
     return avgDistance
 
 
-
 def getLidarDistanceBack():
     lidarArray = lidar.getRangeImage()
     avgDistance = 0.0
@@ -270,8 +271,24 @@ def angleNormalization(angle):
     return math.atan2(math.sin(angle),math.cos(angle))
 
 
+def getImageCamera():
+    image1 = cameraRight.getImage()
+    image2 = cameraLeft.getImage()
+    width = cameraRight.getWidth()
+    height = cameraLeft.getHeight()
+    image_array1 = np.frombuffer(image1, dtype=np.uint8).reshape((height, width, 4))
+    image_array2 = np.frombuffer(image2, dtype=np.uint8).reshape((height, width, 4))
+    image_rgb1 = cv2.cvtColor(image_array1, cv2.COLOR_RGBA2RGB)
+    image_rgb2 = cv2.cvtColor(image_array2, cv2.COLOR_RGBA2RGB)
+    image_resized1 = cv2.resize(image_rgb1, (64, 40))
+    image_resized2 = cv2.resize(image_rgb2, (64, 40))
+    cv2.imwrite("captured_image_cameraRight.jpg", image_resized1)
+    cv2.imwrite("captured_image_cameraLeft.jpg", image_resized2)
+
+
 def main():
     while robot.step(timeStep) != -1:
+        getImageCamera()
         if getColour() == "hole":
             goBack()
         if getLidarDistanceFront() <= 0.065:
