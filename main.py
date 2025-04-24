@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import struct
 import math
+import random
 
 
 # variabili generali o globali
@@ -179,6 +180,7 @@ def getLidarDistanceRight():
     return avgDistance
 
 
+
 def getLidarDistanceBack():
     lidarArray = lidar.getRangeImage()
     avgDistance = 0.0
@@ -271,6 +273,25 @@ def angleNormalization(angle):
     return math.atan2(math.sin(angle),math.cos(angle))
 
 
+def wallAhead():
+    if getLidarDistanceLeft() > getLidarDistanceRight():
+        turnLeft()
+    elif getLidarDistanceLeft() < getLidarDistanceRight():
+        turnRight()
+    else:
+        if random.randint(1, 100) % 2 == 0:
+            turnLeft()
+        else:
+            turnRight()
+
+
+def hole():
+    goBack()
+    while robot.step(timeStep) != -1:
+        if getColour() == "white":
+            break
+    wallAhead()
+
 def getImageCamera():
     image1 = cameraRight.getImage()
     image2 = cameraLeft.getImage()
@@ -299,6 +320,9 @@ def main():
             elif getLidarDistanceLeft() <= 0.08:
                 print("spin on right")
                 turnRight()
+            else:
+                print("Wall ahead")
+                wallAhead()
             continue
         forward()
 
