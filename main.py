@@ -37,9 +37,9 @@ distanceSensorFront.enable(timeStep)
 
 # camera
 cameraRight = robot.getDevice("camera1")
-camera2 = robot.getDevice("camera2")
+cameraLeft = robot.getDevice("camera2")
 cameraRight.enable(timeStep)
-camera2.enable(timeStep)
+cameraLeft.enable(timeStep)
 
 
 # inertial unit
@@ -233,7 +233,9 @@ def turnLeft():
         spinOnLeft()
     while robot.step(timeStep) != -1:
         newCurrentOrientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(newCurrentOrientation - targetOrientation) < 0.05:
+        if abs(angleNormalization(newCurrentOrientation - targetOrientation)) < 0.05:
+            stopMotors()
+            print("Left turn completed")
             return
 
 
@@ -258,8 +260,14 @@ def turnRight():
         spinOnRight()
     while robot.step(timeStep) != -1:
         newCurrentOrientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(newCurrentOrientation - targetOrientation) < 0.05:
+        if abs(angleNormalization(newCurrentOrientation - targetOrientation)) < 0.05:
+            stopMotors()
+            print("Turn turn completed")
             return
+
+
+def angleNormalization(angle):
+    return math.atan2(math.sin(angle),math.cos(angle))
 
 
 def main():
