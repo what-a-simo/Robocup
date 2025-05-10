@@ -180,7 +180,6 @@ def getLidarDistanceRight():
     return avgDistance
 
 
-
 def getLidarDistanceBack():
     lidarArray = lidar.getRangeImage()
     avgDistance = 0.0
@@ -283,6 +282,33 @@ def wallAhead():
             turnLeft()
         else:
             turnRight()
+            
+            
+# def directionCorrection():
+#     currentOrientation = inertialUnit.getRollPitchYaw()[2]
+#     targetOrientation = 0.0
+#     if -math.pi/4 <= currentOrientation <= math.pi/4:
+#         print("nord")
+#         #spin
+#         #targetOrientation = 0.0
+#     elif math.pi/4 <= currentOrientation <= 3 * math.pi/4:
+#         print("ovest")
+#         #spin
+#         #targetOrientation = math.pi/2
+#     elif 3 * math.pi/4 <= currentOrientation <= math.pi or -math.pi <= currentOrientation <= - 3 * math.pi/4:
+#         print("sud")
+#         #spin
+#         #targetOrientation = math.pi
+#     elif - 3 * math.pi/4 <= currentOrientation <= - math.pi/4:
+#         print("est")
+#         #spin
+#         #targetOrientation = -math.pi/2
+#     while robot.step(timeStep) != -1:
+#         newCurrentOrientation = inertialUnit.getRollPitchYaw()[2]
+#         if abs(angleNormalization(newCurrentOrientation - targetOrientation)) < 0.05:
+#             stopMotors()
+#             print("direction correction completed")
+#             return
 
 
 def hole():
@@ -291,6 +317,7 @@ def hole():
         if getColour() == "white":
             break
     wallAhead()
+
 
 def getImageCamera():
     image1 = cameraRight.getImage()
