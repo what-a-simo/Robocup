@@ -1,0 +1,8 @@
+0 corrosive_Hazmat
+1 flammble-gas_Hazmat
+2 only_wall
+3 organic-peroxide_Hazmat
+4 poison_Hazmat
+5 unharmed_Victims
+6 harmed_victims
+7 stable_victims
