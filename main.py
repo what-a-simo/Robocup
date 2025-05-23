@@ -3,8 +3,8 @@ import cv2
 import numpy as np
 import math
 import random
-import tensorflow as tf
-from tensorflow import keras
+from keras.models import load_model
+
 
 
 # variabili generali o globali
@@ -73,8 +73,9 @@ lidar.enable(timeStep)
 
 
 # model
-model = tf.keras.models.load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/oldModel/keras_model.h5")
-classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/oldModel/labels.txt", "r").readlines()
+np.set_printoptions(suppress=True)
+model = load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/newModel/keras_model.h5", compile=False)
+classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/newModel/labels.txt", "r").readlines()
 
 
 start = robot.getTime()
