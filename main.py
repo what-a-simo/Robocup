@@ -31,15 +31,6 @@ wheel_right.setVelocity(0)
 wheel_left.setVelocity(0)
 
 
-# sensori di distanza frontale, destro e sinistro
-distanceSensorRight = robot.getDevice("distance sensor1")
-distanceSensorLeft = robot.getDevice("distance sensor2")
-distanceSensorFront = robot.getDevice("distance sensor3")
-distanceSensorRight.enable(timeStep)
-distanceSensorLeft.enable(timeStep)
-distanceSensorFront.enable(timeStep)
-
-
 # camera
 cameraRight = robot.getDevice("camera1")
 cameraLeft = robot.getDevice("camera2")
@@ -75,8 +66,8 @@ lidar.enable(timeStep)
 
 # model
 np.set_printoptions(suppress=True)
-model = load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/newModel/keras_model.h5", compile=False)
-classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/newModel/labels.txt", "r").readlines()
+model = load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/keras_model.h5", compile=False)
+classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/labels.txt", "r").readlines()
 
 
 start = robot.getTime()
@@ -460,18 +451,18 @@ def hole():
 
 
 def getImageCamera():
-        image1 = cameraRight.getImage()
-        image2 = cameraLeft.getImage()
-        width = cameraRight.getWidth()
-        height = cameraLeft.getHeight()
-        image_array1 = np.frombuffer(image1, dtype=np.uint8).reshape((height, width, 4))
-        image_array2 = np.frombuffer(image2, dtype=np.uint8).reshape((height, width, 4))
-        image_rgb1 = cv2.cvtColor(image_array1, cv2.COLOR_RGBA2RGB)
-        image_rgb2 = cv2.cvtColor(image_array2, cv2.COLOR_RGBA2RGB)
-        image_resized1 = cv2.resize(image_rgb1, (64, 40))
-        image_resized2 = cv2.resize(image_rgb2, (64, 40))
-        cv2.imwrite("captured_image_cameraRight.jpg", image_resized1)
-        cv2.imwrite("captured_image_cameraLeft.jpg", image_resized2)
+    image1 = cameraRight.getImage()
+    image2 = cameraLeft.getImage()
+    width = cameraRight.getWidth()
+    height = cameraLeft.getHeight()
+    image_array1 = np.frombuffer(image1, dtype=np.uint8).reshape((height, width, 4))
+    image_array2 = np.frombuffer(image2, dtype=np.uint8).reshape((height, width, 4))
+    image_rgb1 = cv2.cvtColor(image_array1, cv2.COLOR_RGBA2RGB)
+    image_rgb2 = cv2.cvtColor(image_array2, cv2.COLOR_RGBA2RGB)
+    image_resized1 = cv2.resize(image_rgb1, (64, 40))
+    image_resized2 = cv2.resize(image_rgb2, (64, 40))
+    cv2.imwrite("captured_image_cameraRight.jpg", image_resized1)
+    cv2.imwrite("captured_image_cameraLeft.jpg", image_resized2)
 
 
 def predictChar():
@@ -505,7 +496,7 @@ def main():
     while robot.step(timeStep) != -1:
         directionCorrection()
         #exploreNewAreas()
-        getImageCamera()
+        #getImageCamera()
         predictChar()
         if getColour() == "hole":
             hole()
