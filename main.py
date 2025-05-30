@@ -5,6 +5,7 @@ import struct
 import math
 import random
 import tensorflow as tf
+from keras.models import load_model
 
 
 # variabili generali o globali
@@ -73,9 +74,9 @@ lidar.enable(timeStep)
 
 
 # model
-#model = tf.keras.models.load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/keras_model.h5")
-#classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/labels.txt", "r").readlines()
-
+np.set_printoptions(suppress=True)
+model = load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/newModel/keras_model.h5", compile=False)
+classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/newModel/labels.txt", "r").readlines()
 
 
 start = robot.getTime()
@@ -351,6 +352,7 @@ def directionCorrection():
                     return
     return
 
+
 # def directionCorrection():
 #     currentOrientation = inertialUnit.getRollPitchYaw()[2]
 #     print("Current Orientation " + str(currentOrientation))
@@ -472,31 +474,31 @@ def getImageCamera():
         cv2.imwrite("captured_image_cameraLeft.jpg", image_resized2)
 
 
-# def predictChar():
-#     imageRight = cameraRight.getImage()
-#     imageLeft = cameraLeft.getImage()
-#     imageRight = np.asarray(imageRight, dtype=np.float32).reshape(1, 64, 40, 3)
-#     imageLeft = np.asarray(imageLeft, dtype=np.float32).reshape(1, 64, 64, 3)
-#     imageRight = (imageRight / 127.5) - 1
-#     imageLeft = (imageLeft / 127.5) -1
-#
-#     predictionRight = model.predict(imageRight)
-#     indexRight = np.argmax(predictionRight)
-#     class_nameRight = classNames[indexRight]
-#     confidence_scoreRight = predictionRight[0][indexRight]
-#
-#     print("--------Right---------")
-#     print("     Class:", class_nameRight[2:], end="")
-#     print("     Confidence Score:", str(np.round(confidence_scoreRight * 100))[:-2], "%")
-#
-#     predictionLeft = model.predict(imageLeft)
-#     indexLeft = np.argmax(predictionLeft)
-#     class_nameLeft = classNames[indexLeft]
-#     confidence_scoreLeft = predictionLeft[0][indexLeft]
-#
-#     print("--------Left---------")
-#     print("     Class:", class_nameLeft[2:], end="")
-#     print("     Confidence Score:", str(np.round(confidence_scoreLeft * 100))[:-2], "%")
+def predictChar():
+    imageRight = cameraRight.getImage()
+    imageLeft = cameraLeft.getImage()
+    imageRight = np.asarray(imageRight, dtype=np.float32).reshape(1, 64, 40, 3)
+    imageLeft = np.asarray(imageLeft, dtype=np.float32).reshape(1, 64, 64, 3)
+    imageRight = (imageRight / 127.5) - 1
+    imageLeft = (imageLeft / 127.5) -1
+
+    predictionRight = model.predict(imageRight)
+    indexRight = np.argmax(predictionRight)
+    class_nameRight = classNames[indexRight]
+    confidence_scoreRight = predictionRight[0][indexRight]
+
+    print("--------Right---------")
+    print("     Class:", class_nameRight[2:], end="")
+    print("     Confidence Score:", str(np.round(confidence_scoreRight * 100))[:-2], "%")
+
+    predictionLeft = model.predict(imageLeft)
+    indexLeft = np.argmax(predictionLeft)
+    class_nameLeft = classNames[indexLeft]
+    confidence_scoreLeft = predictionLeft[0][indexLeft]
+
+    print("--------Left---------")
+    print("     Class:", class_nameLeft[2:], end="")
+    print("     Confidence Score:", str(np.round(confidence_scoreLeft * 100))[:-2], "%")
 
 
 def main():
@@ -504,7 +506,7 @@ def main():
         directionCorrection()
         #exploreNewAreas()
         getImageCamera()
-        #predictChar()
+        predictChar()
         if getColour() == "hole":
             hole()
         if getLidarDistanceFront() <= 0.065:
