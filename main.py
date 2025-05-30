@@ -1,10 +1,10 @@
 from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS, Emitter, Lidar
 import cv2
 import numpy as np
+import struct
 import math
 import random
-from keras.models import load_model
-
+import tensorflow as tf
 
 
 # variabili generali o globali
@@ -73,9 +73,9 @@ lidar.enable(timeStep)
 
 
 # model
-np.set_printoptions(suppress=True)
-model = load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/newModel/keras_model.h5", compile=False)
-classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/newModel/labels.txt", "r").readlines()
+#model = tf.keras.models.load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/keras_model.h5")
+#classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/labels.txt", "r").readlines()
+
 
 
 start = robot.getTime()
@@ -277,46 +277,124 @@ def turnRight():
 
 def directionCorrection():
     currentOrientation = inertialUnit.getRollPitchYaw()[2]
-    print("Current Orientation " + str(currentOrientation))
-    targetOrientation = 0.0
-    if 0.1 <= currentOrientation <= math.pi / 4:  # nord-ovest
-        print("nord-ovest")
-        spinOnRight()
-        targetOrientation = 0.0
-    elif math.pi / 4 <= currentOrientation <= math.pi / 2 - 0.1:  # ovest-nord
-        print("ovest-nord")
-        spinOnLeft()
-        targetOrientation = math.pi / 2
-    elif math.pi / 2 + 0.1 <= currentOrientation <= 3 * math.pi / 4:  # ovest-sud
-        print("ovest-nord")
-        spinOnRight()
-        targetOrientation = math.pi / 2
-    elif 3 * math.pi / 4 <= currentOrientation <= math.pi - 0.1:  # sud-ovest
-        print("sud-ovest")
-        spinOnLeft()
-        targetOrientation = math.pi
-    elif -math.pi + 0.1 <= currentOrientation <= -3 * math.pi / 4:  # sud-est
-        print("sud-est")
-        spinOnRight()
-        targetOrientation = -math.pi
-    elif -3 * math.pi / 4 <= currentOrientation <= -math.pi / 2 + 0.1:  # est-usd
-        print("est-usd")
-        spinOnLeft()
-        targetOrientation = -math.pi / 2
-    elif -math.pi / 2 + 0.1 <= currentOrientation <= -math.pi / 4:  # est-nord
-        print("est-nord")
-        spinOnRight()
-        targetOrientation = -math.pi / 2
-    elif -math.pi / 4 <= currentOrientation <= -0.1:  # nord-est
-        print("nord-est")
-        spinOnLeft()
-        targetOrientation = 0.0
-    while robot.step(timeStep) != -1:
-        newCurrentOrientation = inertialUnit.getRollPitchYaw()[2]
-        if abs(angleNormalization(newCurrentOrientation - targetOrientation)) < 0.05:
+    if 0.2 <= currentOrientation <= 1.4:
+        if currentOrientation <= 0.8:  # nord
             stopMotors()
-            print("direction correction completed")
-            return
+            targetOrientation = 0.0
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(angleNormalization(currentOrientation2 - targetOrientation)) < 0.05:
+                    return
+        else:  # ovest
+            stopMotors()
+            targetOrientation = 1.6
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(angleNormalization(currentOrientation2 - targetOrientation)) < 0.05:
+                    return
+    if 1.8 <= currentOrientation <= 2.9:
+        if currentOrientation <= 2.2:  # ovest
+            stopMotors()
+            targetOrientation = 1.6
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(angleNormalization(currentOrientation2 - targetOrientation)) < 0.05:
+                    return
+        else:  # sud
+            stopMotors()
+            targetOrientation = 3.2
+            spinOnLeft()
+            counter = 0
+            while robot.step(timeStep) != -1:
+                counter = counter + 1
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(angleNormalization(currentOrientation2 - targetOrientation)) < 0.05:
+                    return
+    if -2.9 <= currentOrientation <= -1.8:
+        if currentOrientation <= -2.2:  # sud
+            stopMotors()
+            targetOrientation = 3.2
+            spinOnLeft()
+            counter = 0
+            while robot.step(timeStep) != -1:
+                counter = counter + 1
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(angleNormalization(currentOrientation2 - targetOrientation)) < 0.05:
+                    return
+        else:  # est
+            stopMotors()
+            targetOrientation = -1.6
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(angleNormalization(currentOrientation2 - targetOrientation)) < 0.05:
+                    return
+    if -1.4 <= currentOrientation <= -0.2:
+        if currentOrientation <= -0.8:  # est
+            stopMotors()
+            targetOrientation = -1.6
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(angleNormalization(currentOrientation2 - targetOrientation)) < 0.05:
+                    return
+        else:  # nord
+            stopMotors()
+            targetOrientation = 0.0
+            spinOnLeft()
+            while robot.step(timeStep) != -1:
+                currentOrientation2 = inertialUnit.getRollPitchYaw()[2]
+                if abs(angleNormalization(currentOrientation2 - targetOrientation)) < 0.05:
+                    return
+    return
+
+# def directionCorrection():
+#     currentOrientation = inertialUnit.getRollPitchYaw()[2]
+#     print("Current Orientation " + str(currentOrientation))
+#     if 0.15 <= currentOrientation <= math.pi / 4:  # nord-ovest
+#         print("nord-ovest")
+#         spinOnRight()
+#         targetOrientation = 0.0
+#     elif math.pi / 4 <= currentOrientation <= math.pi / 2 - 0.15:  # ovest-nord
+#         print("ovest-nord")
+#         spinOnLeft()
+#         targetOrientation = math.pi / 2
+#     elif math.pi / 2 + 0.15 <= currentOrientation <= 3 * math.pi / 4:  # ovest-sud
+#         print("ovest-nord")
+#         spinOnRight()
+#         targetOrientation = math.pi / 2
+#     elif 3 * math.pi / 4 <= currentOrientation <= math.pi - 0.15:  # sud-ovest
+#         print("sud-ovest")
+#         spinOnLeft()
+#         targetOrientation = math.pi
+#     elif -math.pi + 0.15 <= currentOrientation <= -3 * math.pi / 4:  # sud-est
+#         print("sud-est")
+#         spinOnRight()
+#         targetOrientation = -math.pi
+#     elif -3 * math.pi / 4 <= currentOrientation <= -math.pi / 2 + 0.15:  # est-usd
+#         print("est-sud")
+#         spinOnLeft()
+#         targetOrientation = -math.pi / 2
+#     elif -math.pi / 2 + 0.15 <= currentOrientation <= -math.pi / 4:  # est-nord
+#         print("est-nord")
+#         spinOnRight()
+#         targetOrientation = -math.pi / 2
+#     elif -math.pi / 4 <= currentOrientation <= -0.15:  # nord-est
+#         print("nord-est")
+#         spinOnLeft()
+#         targetOrientation = 0.0
+#     else:
+#         return
+#     while robot.step(timeStep) != -1:
+#         newCurrentOrientation = inertialUnit.getRollPitchYaw()[2]
+#         if abs(angleNormalization(newCurrentOrientation - targetOrientation)) < 0.05:
+#             stopMotors()
+#             print("direction correction completed")
+#             return
+#     return
 
 
 def angleNormalization(angle):
@@ -380,45 +458,45 @@ def hole():
 
 
 def getImageCamera():
-    image1 = cameraRight.getImage()
-    image2 = cameraLeft.getImage()
-    width = cameraRight.getWidth()
-    height = cameraLeft.getHeight()
-    image_array1 = np.frombuffer(image1, dtype=np.uint8).reshape((height, width, 4))
-    image_array2 = np.frombuffer(image2, dtype=np.uint8).reshape((height, width, 4))
-    image_rgb1 = cv2.cvtColor(image_array1, cv2.COLOR_RGBA2RGB)
-    image_rgb2 = cv2.cvtColor(image_array2, cv2.COLOR_RGBA2RGB)
-    image_resized1 = cv2.resize(image_rgb1, (64, 40))
-    image_resized2 = cv2.resize(image_rgb2, (64, 40))
-    cv2.imwrite("captured_image_cameraRight.jpg", image_resized1)
-    cv2.imwrite("captured_image_cameraLeft.jpg", image_resized2)
+        image1 = cameraRight.getImage()
+        image2 = cameraLeft.getImage()
+        width = cameraRight.getWidth()
+        height = cameraLeft.getHeight()
+        image_array1 = np.frombuffer(image1, dtype=np.uint8).reshape((height, width, 4))
+        image_array2 = np.frombuffer(image2, dtype=np.uint8).reshape((height, width, 4))
+        image_rgb1 = cv2.cvtColor(image_array1, cv2.COLOR_RGBA2RGB)
+        image_rgb2 = cv2.cvtColor(image_array2, cv2.COLOR_RGBA2RGB)
+        image_resized1 = cv2.resize(image_rgb1, (64, 40))
+        image_resized2 = cv2.resize(image_rgb2, (64, 40))
+        cv2.imwrite("captured_image_cameraRight.jpg", image_resized1)
+        cv2.imwrite("captured_image_cameraLeft.jpg", image_resized2)
 
 
-def predictChar():
-    imageRight = cameraRight.getImage()
-    imageLeft = cameraLeft.getImage()
-    imageRight = np.asarray(imageRight, dtype=np.float32).reshape(1, 64, 40, 3)
-    imageLeft = np.asarray(imageLeft, dtype=np.float32).reshape(1, 64, 64, 3)
-    imageRight = (imageRight / 127.5) - 1
-    imageLeft = (imageLeft / 127.5) -1
-
-    predictionRight = model.predict(imageRight)
-    indexRight = np.argmax(predictionRight)
-    class_nameRight = classNames[indexRight]
-    confidence_scoreRight = predictionRight[0][indexRight]
-
-    print("--------Right---------")
-    print("     Class:", class_nameRight[2:], end="")
-    print("     Confidence Score:", str(np.round(confidence_scoreRight * 100))[:-2], "%")
-
-    predictionLeft = model.predict(imageLeft)
-    indexLeft = np.argmax(predictionLeft)
-    class_nameLeft = classNames[indexLeft]
-    confidence_scoreLeft = predictionLeft[0][indexLeft]
-
-    print("--------Left---------")
-    print("     Class:", class_nameLeft[2:], end="")
-    print("     Confidence Score:", str(np.round(confidence_scoreLeft * 100))[:-2], "%")
+# def predictChar():
+#     imageRight = cameraRight.getImage()
+#     imageLeft = cameraLeft.getImage()
+#     imageRight = np.asarray(imageRight, dtype=np.float32).reshape(1, 64, 40, 3)
+#     imageLeft = np.asarray(imageLeft, dtype=np.float32).reshape(1, 64, 64, 3)
+#     imageRight = (imageRight / 127.5) - 1
+#     imageLeft = (imageLeft / 127.5) -1
+#
+#     predictionRight = model.predict(imageRight)
+#     indexRight = np.argmax(predictionRight)
+#     class_nameRight = classNames[indexRight]
+#     confidence_scoreRight = predictionRight[0][indexRight]
+#
+#     print("--------Right---------")
+#     print("     Class:", class_nameRight[2:], end="")
+#     print("     Confidence Score:", str(np.round(confidence_scoreRight * 100))[:-2], "%")
+#
+#     predictionLeft = model.predict(imageLeft)
+#     indexLeft = np.argmax(predictionLeft)
+#     class_nameLeft = classNames[indexLeft]
+#     confidence_scoreLeft = predictionLeft[0][indexLeft]
+#
+#     print("--------Left---------")
+#     print("     Class:", class_nameLeft[2:], end="")
+#     print("     Confidence Score:", str(np.round(confidence_scoreLeft * 100))[:-2], "%")
 
 
 def main():
@@ -426,7 +504,7 @@ def main():
         directionCorrection()
         #exploreNewAreas()
         getImageCamera()
-        predictChar()
+        #predictChar()
         if getColour() == "hole":
             hole()
         if getLidarDistanceFront() <= 0.065:
