@@ -1,11 +1,12 @@
+from time import sleep
 from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS, Emitter, Lidar
 import cv2
 import numpy as np
-import struct
 import math
 import random
-import tensorflow as tf
 from keras.models import load_model
+import struct
+from keras.src.legacy.saving.serialization import class_and_config_for_serialized_keras_object
 
 
 # variabili generali o globali
@@ -62,6 +63,10 @@ gps.enable(timeStep)
 # lidar
 lidar = robot.getDevice("lidar")
 lidar.enable(timeStep)
+
+
+# emitter
+emitter = robot.getDevice("emitter")
 
 
 # model
@@ -415,6 +420,18 @@ def hole():
     wallAhead()
 
 
+def getGpsValues():
+    position = gps.getValues()
+    x = position[0] * 100
+    y = position[2] * 100
+    return x, y
+
+
+def printGpsValues():
+    x, y = getGpsValues()
+    print("X: " + str(x) + " - Y: " + str(y))
+
+
 # def exploreNewAreas():
 #     imageRight = cameraRight.getImage()
 #     imageLeft = cameraLeft.getImage()
@@ -427,27 +444,6 @@ def hole():
 #     if colourFoundLeft != "null":
 #         print("gay simo")
 #         # adding logic
-
-
-# def getEntranceTile(image):
-#     b = image[:, :, 0]
-#     g = image[:, :, 1]
-#     r = image[:, :, 2]
-#     avgB = np.mean(b)
-#     avgG = np.mean(g)
-#     avgR = np.mean(r)
-#     if avgB > avgG and avgB > avgR:
-#         print("Blue")
-#         return "blue"
-#     elif avgG > avgB and avgG > avgR:
-#         print("Green")
-#         return "green"
-#     elif avgR > avgG and avgR > avgB:
-#         print("Red")
-#         return "red"
-#     else:
-#         print("nothing")
-#         return "null"
 
 
 def getImageCamera():
@@ -490,6 +486,86 @@ def predictChar():
     print("--------Left---------")
     print("     Class:", class_nameLeft[2:], end="")
     print("     Confidence Score:", str(np.round(confidence_scoreLeft * 100))[:-2], "%")
+
+    if class_nameRight[2:] == "only_wall":
+        match (class_nameLeft[2:]):
+            case "corrosive_Hazmat":
+                sleep(1)
+                score('C')
+            case "flammable-gas_Hazmat":
+                sleep(1)
+                score('F')
+            case "harmed_victims":
+                sleep(1)
+                score('H')
+            case "only_wall":
+                score('1')
+            case "organic-peroxide_Hazmat":
+                sleep(1)
+                score('O')
+            case "poison_Hazmat":
+                sleep(1)
+                score('P')
+            case "stable_victims":
+                sleep(1)
+                score('S')
+            case "unharmed_Victims":
+                sleep(1)
+                score('U')
+    elif class_nameLeft[2:] == "only_wall":
+        match (class_nameRight[2:]):
+            case "corrosive_Hazmat":
+                sleep(1)
+                score('C')
+            case "flammable-gas_Hazmat":
+                sleep(1)
+                score('F')
+            case "harmed_victims":
+                sleep(1)
+                score('H')
+            case "only_wall":
+                score('1')
+            case "organic-peroxide_Hazmat":
+                sleep(1)
+                score('O')
+            case "poison_Hazmat":
+                sleep(1)
+                score('P')
+            case "stable_victims":
+                sleep(1)
+                score('S')
+            case "unharmed_Victims":
+                sleep(1)
+                score('U')
+
+
+#   --------- indice ---------
+#       '0': None/Unknown
+#       '1': Walls
+#       '2': Holes
+#       '3': Swamps
+#       '4': Checkpoints
+#       '5': Starting tile
+#       '6': Connection tile from 1 to 2
+#       '7': Connection tile from 1 to 3
+#       '8': Connection tile from 2 to 3
+#       'H': Harmed victim
+#       'S': Stable victim
+#       'U': Unharmed victim
+#       'F': Flammable Gas
+#       'P': Poison
+#       'C': Corrosive
+#       'O': Organic Peroxide
+
+
+def score(ch):
+    stopMotors()
+    victimType = bytes(ch, "utf-8")
+    position = getGpsValues()
+    x = int(position[0])
+    y = int(position[1])
+    message = struct.pack("i i c", x, y, victimType)
+    emitter.send(message)
 
 
 def main():
