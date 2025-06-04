@@ -4,9 +4,9 @@ import cv2
 import numpy as np
 import math
 import random
-from keras.models import load_model
+# from keras.models import load_model
 import struct
-from keras.src.legacy.saving.serialization import class_and_config_for_serialized_keras_object
+import tensorflow as tf
 
 
 # variabili generali o globali
@@ -67,12 +67,17 @@ lidar.enable(timeStep)
 
 # emitter
 emitter = robot.getDevice("emitter")
+emitter.setChannel(1)
 
 
 # model
-np.set_printoptions(suppress=True)
-model = load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/keras_model.h5", compile=False)
-classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/labels.txt", "r").readlines()
+#  TF
+model = tf.model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_tflite/model_unquant.tflite")
+
+#  KERAS
+# np.set_printoptions(suppress=True)
+# model = load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/keras_model.h5", compile=False)
+# classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/labels.txt", "r").readlines()
 
 
 start = robot.getTime()
@@ -163,7 +168,7 @@ def getLidarDistanceFront():
     if rightValue <= 10:
         return 1.0
     avgDistance = round(avgDistance / rightValue,3)
-    print(f"The average front distance is :  {avgDistance}")
+    #print(f"The average front distance is :  {avgDistance}")
     return avgDistance
 
 
@@ -180,7 +185,7 @@ def getLidarDistanceRight():
     if rightValue <= 10:
         return 1.0
     avgDistance = round(avgDistance / rightValue, 3)
-    print(f"The average right distance is :  {avgDistance}")
+    #print(f"The average right distance is :  {avgDistance}")
     return avgDistance
 
 
@@ -197,7 +202,7 @@ def getLidarDistanceBack():
     if rightValue <= 10:
         return 1.0
     avgDistance = round(avgDistance / rightValue, 3)
-    print(f"The average back distance is :  {avgDistance}")
+    #print(f"The average back distance is :  {avgDistance}")
     return avgDistance
 
 
@@ -214,7 +219,7 @@ def getLidarDistanceLeft():
     if rightValue <= 10:
         return 1.0
     avgDistance = round(avgDistance / rightValue, 3)
-    print(f"The average left distance is :  {avgDistance}")
+    #print(f"The average left distance is :  {avgDistance}")
     return avgDistance
 
 
@@ -222,26 +227,26 @@ def turnLeft():
     currentOrientation = inertialUnit.getRollPitchYaw()[2]
     targetOrientation = 0.0
     if -0.1 <= currentOrientation <= 0.1: # nord
-        print("nord")
+        #print("nord")
         targetOrientation = math.pi/2
         spinOnLeft()
     elif (math.pi/2 - 0.1) <= currentOrientation <= (math.pi/2 + 0.1): # ovest
-        print("ovest")
+        #print("ovest")
         targetOrientation = math.pi
         spinOnLeft()
     elif -math.pi <= currentOrientation <= (-math.pi + 0.1) or (math.pi - 0.1) <= currentOrientation <= math.pi: # sud
-        print("sud")
+        #print("sud")
         targetOrientation = -(math.pi / 2)
         spinOnLeft()
     elif (-(math.pi/2) - 0.1) <= currentOrientation <= (-(math.pi/2) + 0.1): # est
-        print("est")
+        #print("est")
         targetOrientation = 0.0
         spinOnLeft()
     while robot.step(timeStep) != -1:
         newCurrentOrientation = inertialUnit.getRollPitchYaw()[2]
         if abs(angleNormalization(newCurrentOrientation - targetOrientation)) < 0.05:
             stopMotors()
-            print("Left turn completed")
+            #print("Left turn completed")
             return
 
 
@@ -249,26 +254,26 @@ def turnRight():
     currentOrientation = inertialUnit.getRollPitchYaw()[2]
     targetOrientation = 0.0
     if -0.1 <= currentOrientation <= 0.1: # nord
-        print("nord")
+        #print("nord")
         targetOrientation = -(math.pi/2)
         spinOnRight()
     elif (-(math.pi/2) - 0.1) <= currentOrientation <= (-(math.pi/2) + 0.1): # est
-        print("est")
+        #print("est")
         targetOrientation = math.pi
         spinOnRight()
     elif -math.pi <= currentOrientation <= (-math.pi + 0.1) or (math.pi - 0.1) <= currentOrientation <= math.pi: # sud
-        print("sud")
+        #print("sud")
         targetOrientation = math.pi/2
         spinOnRight()
     elif (math.pi/2 - 0.1) <= currentOrientation <= (math.pi/2 + 0.1): # ovest
-        print("ovest")
+        #print("ovest")
         targetOrientation = 0.0
         spinOnRight()
     while robot.step(timeStep) != -1:
         newCurrentOrientation = inertialUnit.getRollPitchYaw()[2]
         if abs(angleNormalization(newCurrentOrientation - targetOrientation)) < 0.05:
             stopMotors()
-            print("Turn turn completed")
+            #print("Turn turn completed")
             return
 
 
@@ -462,81 +467,84 @@ def getImageCamera():
 
 
 def predictChar():
-    imageRight = cameraRight.getImage()
-    imageLeft = cameraLeft.getImage()
-    imageRight = np.asarray(imageRight, dtype=np.float32).reshape(1, 64, 40, 3)
-    imageLeft = np.asarray(imageLeft, dtype=np.float32).reshape(1, 64, 64, 3)
-    imageRight = (imageRight / 127.5) - 1
-    imageLeft = (imageLeft / 127.5) -1
+    #  TF
 
-    predictionRight = model.predict(imageRight)
-    indexRight = np.argmax(predictionRight)
-    class_nameRight = classNames[indexRight]
-    confidence_scoreRight = predictionRight[0][indexRight]
 
-    print("--------Right---------")
-    print("     Class:", class_nameRight[2:], end="")
-    print("     Confidence Score:", str(np.round(confidence_scoreRight * 100))[:-2], "%")
-
-    predictionLeft = model.predict(imageLeft)
-    indexLeft = np.argmax(predictionLeft)
-    class_nameLeft = classNames[indexLeft]
-    confidence_scoreLeft = predictionLeft[0][indexLeft]
-
-    print("--------Left---------")
-    print("     Class:", class_nameLeft[2:], end="")
-    print("     Confidence Score:", str(np.round(confidence_scoreLeft * 100))[:-2], "%")
-
-    if class_nameRight[2:] == "only_wall":
-        match (class_nameLeft[2:]):
-            case "corrosive_Hazmat":
-                sleep(1)
-                score('C')
-            case "flammable-gas_Hazmat":
-                sleep(1)
-                score('F')
-            case "harmed_victims":
-                sleep(1)
-                score('H')
-            case "only_wall":
-                score('1')
-            case "organic-peroxide_Hazmat":
-                sleep(1)
-                score('O')
-            case "poison_Hazmat":
-                sleep(1)
-                score('P')
-            case "stable_victims":
-                sleep(1)
-                score('S')
-            case "unharmed_Victims":
-                sleep(1)
-                score('U')
-    elif class_nameLeft[2:] == "only_wall":
-        match (class_nameRight[2:]):
-            case "corrosive_Hazmat":
-                sleep(1)
-                score('C')
-            case "flammable-gas_Hazmat":
-                sleep(1)
-                score('F')
-            case "harmed_victims":
-                sleep(1)
-                score('H')
-            case "only_wall":
-                score('1')
-            case "organic-peroxide_Hazmat":
-                sleep(1)
-                score('O')
-            case "poison_Hazmat":
-                sleep(1)
-                score('P')
-            case "stable_victims":
-                sleep(1)
-                score('S')
-            case "unharmed_Victims":
-                sleep(1)
-                score('U')
+    #  KERAS
+    # imageRight = cameraRight.getImage()
+    # imageLeft = cameraLeft.getImage()
+    # imageRight = np.asarray(imageRight, dtype=np.float32).reshape(1, 64, 40, 3)
+    # imageLeft = np.asarray(imageLeft, dtype=np.float32).reshape(1, 64, 64, 3)
+    # imageRight = (imageRight / 127.5) - 1
+    # imageLeft = (imageLeft / 127.5) -1
+    #
+    # predictionRight = model.predict(imageRight)
+    # indexRight = np.argmax(predictionRight)
+    # class_nameRight = classNames[indexRight]
+    # confidence_scoreRight = predictionRight[0][indexRight]
+    #
+    # print("--------Right---------")
+    # print("     Class:", class_nameRight[2:], end="")
+    # print("     Confidence Score:", str(np.round(confidence_scoreRight * 100))[:-2], "%")
+    #
+    # predictionLeft = model.predict(imageLeft)
+    # indexLeft = np.argmax(predictionLeft)
+    # class_nameLeft = classNames[indexLeft]
+    # confidence_scoreLeft = predictionLeft[0][indexLeft]
+    #
+    # print("--------Left---------")
+    # print("     Class:", class_nameLeft[2:], end="")
+    # print("     Confidence Score:", str(np.round(confidence_scoreLeft * 100))[:-2], "%")
+    # if class_nameRight[2:] == "only_wall":
+    #     match (class_nameLeft[2:]):
+    #         case "corrosive_Hazmat":
+    #             sleep(1)
+    #             score('C')
+    #         case "flammable-gas_Hazmat":
+    #             sleep(1)
+    #             score('F')
+    #         case "harmed_victims":
+    #             sleep(1)
+    #             score('H')
+    #         case "only_wall":
+    #             return
+    #         case "organic-peroxide_Hazmat":
+    #             sleep(1)
+    #             score('O')
+    #         case "poison_Hazmat":
+    #             sleep(1)
+    #             score('P')
+    #         case "stable_victims":
+    #             sleep(1)
+    #             score('S')
+    #         case "unharmed_Victims":
+    #             sleep(1)
+    #             score('U')
+    # elif class_nameLeft[2:] == "only_wall":
+    #     match (class_nameRight[2:]):
+    #         case "corrosive_Hazmat":
+    #             sleep(1)
+    #             score('C')
+    #         case "flammable-gas_Hazmat":
+    #             sleep(1)
+    #             score('F')
+    #         case "harmed_victims":
+    #             sleep(1)
+    #             score('H')
+    #         case "only_wall":
+    #             return
+    #         case "organic-peroxide_Hazmat":
+    #             sleep(1)
+    #             score('O')
+    #         case "poison_Hazmat":
+    #             sleep(1)
+    #             score('P')
+    #         case "stable_victims":
+    #             sleep(1)
+    #             score('S')
+    #         case "unharmed_Victims":
+    #             sleep(1)
+    #             score('U')
 
 
 #   --------- indice ---------
@@ -559,13 +567,14 @@ def predictChar():
 
 
 def score(ch):
-    stopMotors()
-    victimType = bytes(ch, "utf-8")
+    victimType = ch.encode("utf-8")
     position = getGpsValues()
     x = int(position[0])
     y = int(position[1])
     message = struct.pack("i i c", x, y, victimType)
+    #print(f"[DEBUG] Sending message: {message} (length: {len(message)})")
     emitter.send(message)
+    #print("[INFO] Message sent.")
 
 
 def main():
@@ -574,6 +583,7 @@ def main():
         #exploreNewAreas()
         #getImageCamera()
         predictChar()
+        #score('U')
         if getColour() == "hole":
             hole()
         if getLidarDistanceFront() <= 0.065:
