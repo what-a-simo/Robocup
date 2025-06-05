@@ -1,12 +1,18 @@
 from time import sleep
+import keras
 from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS, Emitter, Lidar
 import cv2
 import numpy as np
 import math
 import random
-# from keras.models import load_model
+from keras.models import load_model
 import struct
 import tensorflow as tf
+import pathlib
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+from numpy import asarray
+from PIL import Image
 
 
 # variabili generali o globali
@@ -72,12 +78,11 @@ emitter.setChannel(1)
 
 # model
 #  TF
-model = tf.model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_tflite/model_unquant.tflite")
 
 #  KERAS
-# np.set_printoptions(suppress=True)
-# model = load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/keras_model.h5", compile=False)
-# classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/labels.txt", "r").readlines()
+np.set_printoptions(suppress=True)
+model = load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/keras_model.h5", compile=False)
+classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/labels.txt", "r").readlines()
 
 
 start = robot.getTime()
@@ -466,11 +471,43 @@ def getImageCamera():
     cv2.imwrite("captured_image_cameraLeft.jpg", image_resized2)
 
 
+def rgbToGray(image):
+    return np.dot(image[..., :3], [0.2989, 0.5870, 0.1140])
+
+
 def predictChar():
-    #  TF
+    # ARRAY
+    imageRight = cameraRight.getImage()
+    imageLeft = cameraLeft.getImage()
+    width = cameraRight.getWidth()
+    height = cameraLeft.getHeight()
 
+    grayRightImage = rgbToGray(imageRight)
+    grayLeftImage = rgbToGray(imageLeft)
 
-    #  KERAS
+    imageRight = Image.open(grayRightImage)
+    imageLeft = Image.open(grayLeftImage)
+
+    numpyArrayRight = np.array(imageRight)
+    numpyArrayLeft = asarray(imageLeft)
+
+    rowsMediaRight = np.array([0])
+    rowsMediaLeft = np.array([0])
+
+    for i in height:
+        mediaRight = 0
+        for k in width:
+            mediaRight = mediaRight + numpyArrayRight[i][k]
+        rowsMediaRight = np.append(rowsMediaRight, mediaRight)
+        mediaLeft = 0
+        for k in width:
+            mediaLeft = mediaLeft + numpyArrayLeft[i][k]
+        rowsMediaLeft = np.append(rowsMediaLeft, mediaLeft)
+    
+    
+
+    # TF
+    # KERAS
     # imageRight = cameraRight.getImage()
     # imageLeft = cameraLeft.getImage()
     # imageRight = np.asarray(imageRight, dtype=np.float32).reshape(1, 64, 40, 3)
