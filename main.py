@@ -1,18 +1,14 @@
 from time import sleep
-import keras
+from PIL import Image
+from ultralytics import YOLO
 from controller import Robot, DistanceSensor, PositionSensor, Camera, GPS, Emitter, Lidar
 import cv2
 import numpy as np
 import math
 import random
-from keras.models import load_model
 import struct
-import tensorflow as tf
-import pathlib
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-from numpy import asarray
-from PIL import Image
+
+import threading
 
 
 # variabili generali o globali
@@ -71,19 +67,13 @@ lidar = robot.getDevice("lidar")
 lidar.enable(timeStep)
 
 
-# emitter
-emitter = robot.getDevice("emitter")
-emitter.setChannel(1)
-
-
 # model
 #  TF
 
 #  KERAS
-np.set_printoptions(suppress=True)
-model = load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/keras_model.h5", compile=False)
-classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/labels.txt", "r").readlines()
-
+# np.set_printoptions(suppress=True)
+# model = load_model("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/keras_model.h5",compile=False)
+# classNames = open("/Users/simone/Documents/RoboCup/Erebus-v24_1_0/player_controllers/AI/converted_keras/labels.txt","r").readlines()
 
 start = robot.getTime()
 
@@ -91,6 +81,28 @@ start = robot.getTime()
 def forward():
     wheel_left.setVelocity(max_velocity)
     wheel_right.setVelocity(max_velocity)
+
+
+def forwardD():
+    wheel_left.setVelocity(max_velocity)
+    wheel_right.setVelocity(max_velocity)
+    position = getGpsValues()
+    f_x = abs(position[0])+10
+    f_y = abs(position[1])+10
+
+    print(f"{f_x} {f_x}")
+    print(f"{abs(getGpsValues()[0])} {abs(getGpsValues()[1])}")
+    sleep(10)
+
+    while abs(getGpsValues()[0]) != f_x or abs(getGpsValues()[1]) != f_y:
+        wheel_left.setVelocity(max_velocity)
+        wheel_right.setVelocity(max_velocity)
+
+        if getColour() == "hole":
+            hole()
+            break
+
+    stopMotors()
 
 
 def goBack():
@@ -165,15 +177,15 @@ def getLidarDistanceFront():
     avgDistance = 0.0
     rightValue = 0
     # print("-----------------------------------")
-    for i in list(range(1023,1055)) + list(range(1503,1535)):
+    for i in list(range(1023, 1055)) + list(range(1503, 1535)):
         if lidarArray[i] < maxLidarDistance:
             avgDistance += lidarArray[i]
             rightValue += 1
             # print(f"i {i-1023}: {round(lidarArray[i],3)} ")
     if rightValue <= 10:
         return 1.0
-    avgDistance = round(avgDistance / rightValue,3)
-    #print(f"The average front distance is :  {avgDistance}")
+    avgDistance = round(avgDistance / rightValue, 3)
+    # print(f"The average front distance is :  {avgDistance}")
     return avgDistance
 
 
@@ -182,7 +194,7 @@ def getLidarDistanceRight():
     avgDistance = 0.0
     rightValue = 0
     # print("-----------------------------------")
-    for i in range(1119,1183):
+    for i in range(1119, 1183):
         if lidarArray[i] < maxLidarDistance:
             avgDistance += lidarArray[i]
             rightValue += 1
@@ -190,7 +202,7 @@ def getLidarDistanceRight():
     if rightValue <= 10:
         return 1.0
     avgDistance = round(avgDistance / rightValue, 3)
-    #print(f"The average right distance is :  {avgDistance}")
+    # print(f"The average right distance is :  {avgDistance}")
     return avgDistance
 
 
@@ -199,7 +211,7 @@ def getLidarDistanceBack():
     avgDistance = 0.0
     rightValue = 0
     # print("-----------------------------------")
-    for i in range(1247,1311):
+    for i in range(1247, 1311):
         if lidarArray[i] < maxLidarDistance:
             avgDistance += lidarArray[i]
             rightValue += 1
@@ -207,7 +219,7 @@ def getLidarDistanceBack():
     if rightValue <= 10:
         return 1.0
     avgDistance = round(avgDistance / rightValue, 3)
-    #print(f"The average back distance is :  {avgDistance}")
+    # print(f"The average back distance is :  {avgDistance}")
     return avgDistance
 
 
@@ -216,7 +228,7 @@ def getLidarDistanceLeft():
     avgDistance = 0.0
     rightValue = 0
     # print("-----------------------------------")
-    for i in range(1375,1439):
+    for i in range(1375, 1439):
         if lidarArray[i] < maxLidarDistance:
             avgDistance += lidarArray[i]
             rightValue += 1
@@ -224,61 +236,61 @@ def getLidarDistanceLeft():
     if rightValue <= 10:
         return 1.0
     avgDistance = round(avgDistance / rightValue, 3)
-    #print(f"The average left distance is :  {avgDistance}")
+    # print(f"The average left distance is :  {avgDistance}")
     return avgDistance
 
 
 def turnLeft():
     currentOrientation = inertialUnit.getRollPitchYaw()[2]
     targetOrientation = 0.0
-    if -0.1 <= currentOrientation <= 0.1: # nord
-        #print("nord")
-        targetOrientation = math.pi/2
+    if -0.1 <= currentOrientation <= 0.1:  # nord
+        # print("nord")
+        targetOrientation = math.pi / 2
         spinOnLeft()
-    elif (math.pi/2 - 0.1) <= currentOrientation <= (math.pi/2 + 0.1): # ovest
-        #print("ovest")
+    elif (math.pi / 2 - 0.1) <= currentOrientation <= (math.pi / 2 + 0.1):  # ovest
+        # print("ovest")
         targetOrientation = math.pi
         spinOnLeft()
-    elif -math.pi <= currentOrientation <= (-math.pi + 0.1) or (math.pi - 0.1) <= currentOrientation <= math.pi: # sud
-        #print("sud")
+    elif -math.pi <= currentOrientation <= (-math.pi + 0.1) or (math.pi - 0.1) <= currentOrientation <= math.pi:  # sud
+        # print("sud")
         targetOrientation = -(math.pi / 2)
         spinOnLeft()
-    elif (-(math.pi/2) - 0.1) <= currentOrientation <= (-(math.pi/2) + 0.1): # est
-        #print("est")
+    elif (-(math.pi / 2) - 0.1) <= currentOrientation <= (-(math.pi / 2) + 0.1):  # est
+        # print("est")
         targetOrientation = 0.0
         spinOnLeft()
     while robot.step(timeStep) != -1:
         newCurrentOrientation = inertialUnit.getRollPitchYaw()[2]
         if abs(angleNormalization(newCurrentOrientation - targetOrientation)) < 0.05:
             stopMotors()
-            #print("Left turn completed")
+            # print("Left turn completed")
             return
 
 
 def turnRight():
     currentOrientation = inertialUnit.getRollPitchYaw()[2]
     targetOrientation = 0.0
-    if -0.1 <= currentOrientation <= 0.1: # nord
-        #print("nord")
-        targetOrientation = -(math.pi/2)
+    if -0.1 <= currentOrientation <= 0.1:  # nord
+        # print("nord")
+        targetOrientation = -(math.pi / 2)
         spinOnRight()
-    elif (-(math.pi/2) - 0.1) <= currentOrientation <= (-(math.pi/2) + 0.1): # est
-        #print("est")
+    elif (-(math.pi / 2) - 0.1) <= currentOrientation <= (-(math.pi / 2) + 0.1):  # est
+        # print("est")
         targetOrientation = math.pi
         spinOnRight()
-    elif -math.pi <= currentOrientation <= (-math.pi + 0.1) or (math.pi - 0.1) <= currentOrientation <= math.pi: # sud
-        #print("sud")
-        targetOrientation = math.pi/2
+    elif -math.pi <= currentOrientation <= (-math.pi + 0.1) or (math.pi - 0.1) <= currentOrientation <= math.pi:  # sud
+        # print("sud")
+        targetOrientation = math.pi / 2
         spinOnRight()
-    elif (math.pi/2 - 0.1) <= currentOrientation <= (math.pi/2 + 0.1): # ovest
-        #print("ovest")
+    elif (math.pi / 2 - 0.1) <= currentOrientation <= (math.pi / 2 + 0.1):  # ovest
+        # print("ovest")
         targetOrientation = 0.0
         spinOnRight()
     while robot.step(timeStep) != -1:
         newCurrentOrientation = inertialUnit.getRollPitchYaw()[2]
         if abs(angleNormalization(newCurrentOrientation - targetOrientation)) < 0.05:
             stopMotors()
-            #print("Turn turn completed")
+            # print("Turn turn completed")
             return
 
 
@@ -406,7 +418,7 @@ def directionCorrection():
 
 
 def angleNormalization(angle):
-    return math.atan2(math.sin(angle),math.cos(angle))
+    return math.atan2(math.sin(angle), math.cos(angle))
 
 
 def wallAhead():
@@ -456,6 +468,11 @@ def printGpsValues():
 #         # adding logic
 
 
+def turnBack():
+    turnLeft()
+    turnLeft()
+
+
 def getImageCamera():
     image1 = cameraRight.getImage()
     image2 = cameraLeft.getImage()
@@ -475,36 +492,143 @@ def rgbToGray(image):
     return np.dot(image[..., :3], [0.2989, 0.5870, 0.1140])
 
 
+def get_left():
+    imageLeft = cv2.imread("captured_image_cameraLeft.jpg")
+    yolo = YOLO(r"C:\Users\mmich\PycharmProjects\PythonProject1\my_model.pt")
+    results_left = yolo.track(imageLeft, stream=True)
+
+    for result in results_left:
+        if result.boxes is not None:
+            class_ids = result.boxes.cls.cpu().numpy().astype(int)
+            for cls_id in class_ids:
+                class_name_left = result.names[cls_id]
+                print(f"[+] Detected class: {class_name_left}")
+                return class_name_left
+
+def get_right():
+    imageRight = cv2.imread("captured_image_cameraRight.jpg")
+    yolo = YOLO(r"C:\Users\mmich\PycharmProjects\PythonProject1\my_model.pt")
+    results_right = yolo.track(imageRight, stream=True)
+
+    for result in results_right:
+        if result.boxes is not None:
+            class_ids = result.boxes.cls.cpu().numpy().astype(int)
+            for cls_id in class_ids:
+                class_name_right = result.names[cls_id]
+                print(f"[+] Detected class: {class_name_right}")
+                return class_name_right
+
+
+stop = ""
+
 def predictChar():
+    # YOLO
+
+    global stop
+
+    while True:
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
+        getImageCamera()
+
+        class_name_left = get_left()
+        class_name_right = get_right()
+
+        print(class_name_left)
+        print(class_name_right)
+
+
+        if "corrosive_Hazmat" == class_name_left and stop != "C":
+            print("C")
+            stop = "C"
+            score('C')
+        elif "flammble-gas_Hazmat" == class_name_left and stop != "F":
+            print("F")
+            stop = "F"
+            score('F')
+        elif "harmed_victims" == class_name_left and stop != "H":
+            print("H")
+            stop = "H"
+            score('H')
+        elif "organic-peroxide_Hazmat" == class_name_left and stop != "O":
+            print("O")
+            stop = "O"
+            score('O')
+        elif "poison_Hazmat" == class_name_left and stop != "P":
+            print("P")
+            stop = "P"
+            score('P')
+        elif "stable_victims" == class_name_left and stop != "S":
+            print("S")
+            stop = "S"
+            score('S')
+        elif "unharmed_Victims" == class_name_left and stop != "U":
+            print("U")
+            stop = "U"
+            score('U')
+        else:
+            print("fake")
+            stop = ""
+
+        if "corrosive_Hazmat" == class_name_right and stop != "C":
+            print("C")
+            stop = "C"
+            score('C')
+        elif "flammble-gas_Hazmat" == class_name_right and stop != "F":
+            print("F")
+            stop = "F"
+            score('F')
+        elif "harmed_victims" == class_name_right and stop != "H":
+            print("H")
+            stop = "H"
+            score('H')
+        elif "organic-peroxide_Hazmat" == class_name_right and stop != "O":
+            print("O")
+            stop = "O"
+            score('O')
+        elif "poison_Hazmat" == class_name_right and stop != "P":
+            print("P")
+            stop = "P"
+            score('P')
+        elif "stable_victims" == class_name_right and stop != "S":
+            print("S")
+            stop = "S"
+            score('S')
+        elif "unharmed_Victims" == class_name_right and stop != "U":
+            print("U")
+            stop = "U"
+            score('U')
+        else:
+            print("fake")
+            stop = ""
+
     # ARRAY
-    imageRight = cameraRight.getImage()
-    imageLeft = cameraLeft.getImage()
-    width = cameraRight.getWidth()
-    height = cameraLeft.getHeight()
-
-    grayRightImage = rgbToGray(imageRight)
-    grayLeftImage = rgbToGray(imageLeft)
-
-    imageRight = Image.open(grayRightImage)
-    imageLeft = Image.open(grayLeftImage)
-
-    numpyArrayRight = np.array(imageRight)
-    numpyArrayLeft = asarray(imageLeft)
-
-    rowsMediaRight = np.array([0])
-    rowsMediaLeft = np.array([0])
-
-    for i in height:
-        mediaRight = 0
-        for k in width:
-            mediaRight = mediaRight + numpyArrayRight[i][k]
-        rowsMediaRight = np.append(rowsMediaRight, mediaRight)
-        mediaLeft = 0
-        for k in width:
-            mediaLeft = mediaLeft + numpyArrayLeft[i][k]
-        rowsMediaLeft = np.append(rowsMediaLeft, mediaLeft)
-    
-    
+    # imageRight = cameraRight.getImage()
+    # imageLeft = cameraLeft.getImage()
+    # width = cameraRight.getWidth()
+    # height = cameraLeft.getHeight()
+    #
+    # grayRightImage = rgbToGray(imageRight)
+    # grayLeftImage = rgbToGray(imageLeft)
+    #
+    # imageRight = Image.open(grayRightImage)
+    # imageLeft = Image.open(grayLeftImage)
+    #
+    # numpyArrayRight = np.array(imageRight)
+    # numpyArrayLeft = asarray(imageLeft)
+    #
+    # rowsMediaRight = np.array([0])
+    # rowsMediaLeft = np.array([0])
+    #
+    # for i in height:
+    #     mediaRight = 0
+    #     for k in width:
+    #         mediaRight = mediaRight + numpyArrayRight[i][k]
+    #     rowsMediaRight = np.append(rowsMediaRight, mediaRight)
+    #     mediaLeft = 0
+    #     for k in width:
+    #         mediaLeft = mediaLeft + numpyArrayLeft[i][k]
+    #     rowsMediaLeft = np.append(rowsMediaLeft, mediaLeft)
 
     # TF
     # KERAS
@@ -601,26 +725,34 @@ def predictChar():
 #       'P': Poison
 #       'C': Corrosive
 #       'O': Organic Peroxide
+#       '8': Grazie Poli (Massimo)
 
 
 def score(ch):
-    victimType = ch.encode("utf-8")
-    position = getGpsValues()
-    x = int(position[0])
-    y = int(position[1])
+    stopMotors()
+    victimType = bytes(ch, "utf-8")
+    print("motor stopped")
+    position = gps.getValues()  # Get the current gps position of the robot
+    x = int(position[0] * 100)  # Get the xy coordinates, multiplying by 100 to convert from meters to cm
+    y = int(position[2] * 100)
     message = struct.pack("i i c", x, y, victimType)
-    #print(f"[DEBUG] Sending message: {message} (length: {len(message)})")
-    emitter.send(message)
-    #print("[INFO] Message sent.")
+    print(f"[+] Position X: {x} Position Y: {y}")
+    print(f"[DEBUG] Sending message: {message} (length: {len(message)})")
+    #emitter.send(message)
+    print("[INFO] Message sent. motor ripartito")
 
 
 def main():
+    global stop
+
     while robot.step(timeStep) != -1:
         directionCorrection()
-        #exploreNewAreas()
-        #getImageCamera()
-        predictChar()
-        #score('U')
+        # exploreNewAreas()
+        # predictChar()
+
+        if stop != "":
+            sleep(1)
+
         if getColour() == "hole":
             hole()
         if getLidarDistanceFront() <= 0.065:
@@ -637,6 +769,33 @@ def main():
             continue
         forward()
 
+"""
+def main2():
+    not_repeat = ""
+    while robot.step(timeStep) != -1:
+        directionCorrection()
+        # getImageCamera()
+        # predictChar()
+
+        if getLidarDistanceRight() >= 0.08 and not_repeat != "r":
+            stopMotors()
+            turnRight()
+            not_repeat = "r"
+        elif getLidarDistanceFront() >= 0.08:
+            forwardD()
+        elif getLidarDistanceLeft() >= 0.08 and not_repeat != "l":
+            stopMotors()
+            turnLeft()
+            not_repeat = "l"
+        elif getLidarDistanceBack() >= 0.08 and not_repeat !    = "b":
+            stopMotors()
+            turnBack()
+            not_repeat = "b"
+"""
 
 if __name__ == "__main__":
-    main()
+    Thread_2 = threading.Thread(target=main)
+    Thread_1 = threading.Thread(target=predictChar)
+
+    Thread_2.start()
+    Thread_1.start()
