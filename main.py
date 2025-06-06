@@ -521,6 +521,9 @@ def get_right():
 
 stop = ""
 
+
+sleep_event = threading.Event()
+
 def predictChar():
     # YOLO
 
@@ -534,73 +537,77 @@ def predictChar():
         class_name_left = get_left()
         class_name_right = get_right()
 
+
+
         print(class_name_left)
         print(class_name_right)
 
 
-        if "corrosive_Hazmat" == class_name_left and stop != "C":
+        if "corrosive_Hazmat" == class_name_left:
             print("C")
-            stop = "C"
+            sleep_event.set()
             score('C')
-        elif "flammble-gas_Hazmat" == class_name_left and stop != "F":
+        elif "flammble-gas_Hazmat" == class_name_left:
             print("F")
-            stop = "F"
+            sleep_event.set()
             score('F')
-        elif "harmed_victims" == class_name_left and stop != "H":
+        elif "harmed_victims" == class_name_left:
             print("H")
-            stop = "H"
+            sleep_event.set()
             score('H')
-        elif "organic-peroxide_Hazmat" == class_name_left and stop != "O":
+        elif "organic-peroxide_Hazmat" == class_name_left:
             print("O")
-            stop = "O"
+            sleep_event.set()
             score('O')
-        elif "poison_Hazmat" == class_name_left and stop != "P":
+        elif "poison_Hazmat" == class_name_left:
             print("P")
-            stop = "P"
+            sleep_event.set()
             score('P')
-        elif "stable_victims" == class_name_left and stop != "S":
+        elif "stable_victims" == class_name_left:
             print("S")
-            stop = "S"
+            sleep_event.set()
             score('S')
-        elif "unharmed_Victims" == class_name_left and stop != "U":
+        elif "unharmed_Victims" == class_name_left:
             print("U")
-            stop = "U"
+            sleep_event.set()
             score('U')
         else:
             print("fake")
             stop = ""
 
-        if "corrosive_Hazmat" == class_name_right and stop != "C":
+        if "corrosive_Hazmat" == class_name_right:
             print("C")
-            stop = "C"
+            sleep_event.set()
             score('C')
-        elif "flammble-gas_Hazmat" == class_name_right and stop != "F":
+        elif "flammble-gas_Hazmat" == class_name_right:
             print("F")
-            stop = "F"
+            sleep_event.set()
             score('F')
-        elif "harmed_victims" == class_name_right and stop != "H":
+        elif "harmed_victims" == class_name_right:
             print("H")
-            stop = "H"
+            sleep_event.set()
             score('H')
-        elif "organic-peroxide_Hazmat" == class_name_right and stop != "O":
+        elif "organic-peroxide_Hazmat" == class_name_right:
             print("O")
-            stop = "O"
+            sleep_event.set()
             score('O')
-        elif "poison_Hazmat" == class_name_right and stop != "P":
+        elif "poison_Hazmat" == class_name_right:
             print("P")
-            stop = "P"
+            sleep_event.set()
             score('P')
-        elif "stable_victims" == class_name_right and stop != "S":
+        elif "stable_victims" == class_name_right:
             print("S")
-            stop = "S"
+            sleep_event.set()
             score('S')
-        elif "unharmed_Victims" == class_name_right and stop != "U":
+        elif "unharmed_Victims" == class_name_right:
             print("U")
-            stop = "U"
+            sleep_event.set()
             score('U')
         else:
             print("fake")
             stop = ""
+
+
 
     # ARRAY
     # imageRight = cameraRight.getImage()
@@ -749,6 +756,10 @@ def main():
         directionCorrection()
         # exploreNewAreas()
         # predictChar()
+
+        if sleep_event.is_set():
+            sleep(1)
+            sleep_event.clear()
 
         if stop != "":
             sleep(1)
